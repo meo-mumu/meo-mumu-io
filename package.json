@@ -2,10 +2,10 @@
   "name": "portfolio-leo-macias",
   "version": "1.0.0",
   "description": "Portfolio data engineer freelance avec art génératif",
-  "main": "server.js",
+  "main": "server/index.js",
   "scripts": {
-    "dev": "node server.js",
-    "start": "NODE_ENV=production node server.js",
+    "dev": "node server/index.js",
+    "start": "NODE_ENV=production node server/index.js",
     "build": "echo 'No build process needed for vanilla JS'"
   },
   "dependencies": {
