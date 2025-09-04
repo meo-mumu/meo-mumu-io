@@ -43,3 +43,9 @@ npm start
 ---
 
 *Portfolio en développement continu, nouvelles créations ajoutées régulièrement.*
+
+
+## Idea
+- Turn on and of the light sur le site
+- version en et fr
+

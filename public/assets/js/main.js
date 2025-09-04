@@ -1,6 +1,6 @@
 // Point d'entrée JS pour le front - architecture clean code
 import { Particles } from '../../../src/sketches/particles/particles.js';
-import { Terrain } from '../../../src/sketches/terrain.js';
+import { Lenia } from '../../../src/sketches/lenia/lenia.js';
 import { initExpandable, toggleExpandableItem } from '../../../src/ui/expandable.js';
 import { initBulletColorizer } from '../../../src/ui/bullet-colorizer.js';
 import { initNavigation } from '../../../src/ui/navigation.js';
@@ -13,7 +13,7 @@ import { GLOBAL_COLORS, rnd, shuffle } from '../../../src/ui/bullet-colorizer.js
 window.addEventListener('DOMContentLoaded', () => {
   // Initialisation des sketchs p5.js
   new window.p5(Particles, 'particles-container');
-  new window.p5(Terrain, 'terrain-container');
+  new window.p5(Lenia, 'lenia-container');
   
   // Initialisation des composants UI
   initExpandable();

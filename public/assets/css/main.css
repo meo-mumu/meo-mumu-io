@@ -559,8 +559,8 @@ h1.page-intro {
   outline: none;
 }
 
-/* Canvas terrain carré */
-.terrain-container {
+/* Canvas lenia carré */
+.lenia-container {
   width: 100%;
   height: 400px; /* Plus haut que le canvas particules (300px) */
   border: 1px solid #ccc;
