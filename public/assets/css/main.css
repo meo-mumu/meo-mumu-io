@@ -9,9 +9,11 @@ body {
   font-family: "Inter", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   line-height: 1.6;
-  margin: 0 auto;
-  max-width: 60em;
-  padding: 1em;
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
 }
 
 p,
@@ -559,29 +561,36 @@ h1.page-intro {
   outline: none;
 }
 
-/* Canvas lenia carré */
-.lenia-container {
-  width: 100%;
-  height: 400px; /* Plus haut que le canvas particules (300px) */
-  border: 1px solid #ccc;
-  background: #f9f9f9;
-  position: relative;
-  margin: 1em 0;
-}
-
-/* Canvas Lenia */
-.lenia-container {
-  width: 100%;
-  height: 500px;
-  border: 1px solid rgba(122, 155, 115, 0.3);
-  background: linear-gradient(135deg, rgba(10, 10, 15, 0.95), rgba(20, 20, 30, 0.95));
-  position: relative;
-  margin: 1em 0;
-  border-radius: 4px;
+.noita-container {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: black;
+  z-index: 0;
   overflow: hidden;
 }
 
-.lenia-controls {
+/* Canvas Conway plein écran */
+.conway-container {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: black;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.conway-controls {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -589,7 +598,7 @@ h1.page-intro {
   padding: 0.5em 0;
 }
 
-.lenia-button {
+.conway-button {
   background: linear-gradient(135deg, rgba(122, 155, 115, 0.1), rgba(122, 155, 115, 0.05));
   border: 1px solid rgba(122, 155, 115, 0.3);
   color: #7A9B73;
@@ -601,13 +610,13 @@ h1.page-intro {
   font-weight: 500;
 }
 
-.lenia-button:hover {
+.conway-button:hover {
   background: linear-gradient(135deg, rgba(122, 155, 115, 0.15), rgba(122, 155, 115, 0.08));
   border-color: rgba(122, 155, 115, 0.5);
   transform: translateY(-1px);
 }
 
-.lenia-info {
+.conway-info {
   font-size: 0.75em;
   color: hsl(0, 0%, 50%);
   font-style: italic;

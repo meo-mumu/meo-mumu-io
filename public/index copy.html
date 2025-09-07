@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+        content="width=device-width, shrink-to-fit=0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <title>Portfolio - Dieu</title>
+    <link rel="stylesheet" href="assets/css/main.css" />
+</head>
+
+<body>
+    <main>
+        <h1 class="intro">Léo Macias</h1>
+        <p>
+            Bienvenue sur mon portfolio. Data engineer freelance passionné par l'art génératif et les expériences
+            interactives.
+            Mon travail explore la créativité numérique à travers la musique, le code, les animations et les systèmes de
+            particules.
+        </p>
+
+        <div class="image-container">
+            <div class="particles-container" id="particles-container">
+                <!-- L'effet particules sera injecté ici -->
+            </div>
+            <div class="caption">
+                Système de particules génératif en temps réel
+            </div>
+        </div>
+
+        <div id="mini-cv-container">
+            <!-- Le contenu du mini CV sera chargé dynamiquement -->
+        </div>
+
+        <div class="bullet expandable-item">
+            <div class="expandable-header" data-target="music-content">
+                <a href="#" class="expandable-link">Musique</a>
+            </div>
+            <div class="expandable-content" id="music-content">
+                <p class="bullet sub-bullet">
+                    <a href="https://bandcamp.com/exemple" target="_blank">bandcamp</a>
+                    Mes créations musicales et albums.
+                </p>
+                <p class="bullet sub-bullet">
+                    <a href="https://soundcloud.com/exemple" target="_blank">soundcloud</a>
+                    Expérimentations sonores et work-in-progress.
+                </p>
+            </div>
+        </div>
+
+        <div class="bullet expandable-item">
+            <div class="expandable-header" data-target="coding-content">
+                <a href="#" class="expandable-link">Creative coding & shaders</a>
+            </div>
+            <div class="expandable-content" id="coding-content">
+                <div class="lenia-container" id="lenia-container">
+                    <!-- Le lenia system sera injecté ici -->
+                </div>
+                <div class="canvas-caption">
+                    Lenia system - Simulation de vie artificielle avec WebGL
+                </div>
+            </div>
+        </div>
+
+
+        <p class="footnote">
+            <sup>+</sup>Pour plus d'informations > à <a class="email">leomacias@hotmail.fr </a>
+        </p>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <script type="module" src="assets/js/main.js"></script>
+
+</body>
+
+</html>
