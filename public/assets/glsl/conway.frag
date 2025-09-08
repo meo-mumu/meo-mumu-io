@@ -6,7 +6,7 @@ varying vec2 vTexCoord;
 uniform sampler2D tex;
 uniform vec2 normalRes;
 
-void main() {
+void mainConway() {
   vec2 uv = vTexCoord;
   
   uv.y = 1.0 - uv.y;
@@ -39,5 +39,11 @@ void main() {
     }
   }
   
-  gl_FragColor = vec4(a, a, a, 1.0);
+  // Fond gris (245, 235, 220), cellules noires
+  vec3 fondGris = vec3(0.96, 0.92, 0.86); // RGB(245, 235, 220) normalisé
+  vec3 celluleNoire = vec3(0.0, 0.0, 0.0); // Noir
+  
+  // a = 1 pour cellules vivantes (noir), a = 0 pour fond (gris)
+  vec3 color = mix(fondGris, celluleNoire, a);
+  gl_FragColor = vec4(color, 1.0);
 }

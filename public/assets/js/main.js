@@ -1,7 +1,9 @@
 // Point d'entrée JS pour le front - architecture clean code
 import { Particles } from '../../../src/sketches/particles/particles.js';
-import { Conway } from '../../../src/sketches/conway/conway.js';
-import { NoitaText } from '../../../src/sketches/noita-text/noita-text.js';
+import { Mainshader } from '../../../src/sketches/mainshader/mainshader.js';
+import { Maintext } from '../../../src/sketches/maintext/maintext.js';
+
+
 import { initExpandable, toggleExpandableItem } from '../../../src/ui/expandable.js';
 import { initBulletColorizer } from '../../../src/ui/bullet-colorizer.js';
 import { initNavigation } from '../../../src/ui/navigation.js';
@@ -18,8 +20,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   
   // Initialisation des sketchs p5.js
   //new window.p5(Particles, 'particles-container');
-  //new window.p5(Conway, 'conway-container');
-  new window.p5(NoitaText, 'noita-container');
+  new window.p5(Mainshader, 'mainshader-container');
+  new window.p5(Maintext, 'maintext-container');
 
   // Initialisation des composants UI
   initExpandable();

@@ -1,19 +1,19 @@
-export const Conway = (p) => {
+export const Mainshader = (p) => {
   let shaderObj;
   let prevFrame;
   
 
   p.preload = () => {
     shaderObj = p.loadShader(
-      'assets/glsl/conway.vert',
-      'assets/glsl/conway.frag'
+      'assets/glsl/main.vert',
+      'assets/glsl/main.frag'
     );
   };
 
   p.setup = () => {
     // Crée le canvas et l'attache directement au conteneur
     p.noStroke();
-    p.createCanvas(window.innerWidth, window.innerHeight, p.WEBGL).parent('conway-container');
+    p.createCanvas(window.innerWidth, window.innerHeight, p.WEBGL).parent('mainshader-container');
     p.pixelDensity(1);
     p.noSmooth();
 
@@ -26,9 +26,12 @@ export const Conway = (p) => {
     p.strokeWeight(1);
     p.shader(shaderObj);
     shaderObj.setUniform("normalRes", [1.0/p.width, 1.0/p.height]);
+    shaderObj.setUniform("u_widht", p.width);
+    shaderObj.setUniform("u_height", p.height);
   };
 
 p.draw = () => {
+  
   // On place les nouvelles cellules
   if (p.mouseIsPressed) {
     p.line(

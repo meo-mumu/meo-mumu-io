@@ -561,7 +561,8 @@ h1.page-intro {
   outline: none;
 }
 
-.noita-container {
+/* Conteneur principal */
+.app-container {
   width: 100vw;
   height: 100vh;
   position: fixed;
@@ -569,25 +570,38 @@ h1.page-intro {
   left: 0;
   margin: 0;
   padding: 0;
-  border: none;
-  background: black;
-  z-index: 0;
   overflow: hidden;
 }
 
-/* Canvas Conway plein écran */
-.conway-container {
+/* Canvas Mainshader en arrière-plan */
+.mainshader-container {
   width: 100vw;
   height: 100vh;
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   margin: 0;
   padding: 0;
   border: none;
-  background: black;
-  z-index: 0;
+  background: rgb(245, 235, 220); /* Fond gris */
+  z-index: 1;
   overflow: hidden;
+}
+
+/* Canvas MainText au premier plan */
+.maintext-container {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: all;
 }
 
 .conway-controls {
