@@ -4,18 +4,29 @@ export const Maintext = (p) => {
 
   let g;
   let fonts = [];
+  let instructionFonts = [];
   let showDebugCircles = false;
 
   let shockWaveShader;
   const NUM_SHOCKWAVES = 10;
   let centres = new Array(NUM_SHOCKWAVES);
   let times = new Array(NUM_SHOCKWAVES);
+  let sizes = new Array(NUM_SHOCKWAVES); // Tailles des ondes
 
-  let texts = [
-    { text: "Curriculum vitae", x: 0, y: 0, sensitivities: [] },
-    { text: "Soundcloud", x: 0, y: 0, sensitivities: [] },
-    { text: "Shaderland", x: 0, y: 0, sensitivities: [] }
+  let mainTexts = [
+    { text: "Curriculum vitae", x: 0, y: 0, sensitivities: [], hoverStartTime: 0, isHovered: false },
+    { text: "Soundcloud", x: 0, y: 0, sensitivities: [], hoverStartTime: 0, isHovered: false },
+    { text: "Shaderland", x: 0, y: 0, sensitivities: [], hoverStartTime: 0, isHovered: false }
   ];
+  
+  let instructionSensitivities = [];
+  
+  // Variables pour la détection de vitesse de souris
+  let previousMouseX = 0;
+  let previousMouseY = 0;
+  let mouseSpeedThreshold = 5; // Seuil de vitesse pour générer des ondes (plus sensible)
+  let lastWaveTime = 0;
+  let waveDelay = 75; // Délai minimum entre les ondes auto-générées (ms) - compromis
 
   p.preload = () => {
     fonts[0] = { 
@@ -39,6 +50,28 @@ export const Maintext = (p) => {
       threshold: 1.0 
     };
     
+    // Fonts pour instructions (ordre inversé : Ancient -> Courier)
+    instructionFonts[0] = { 
+      font: p.loadFont('assets/fonts/CourierPrime-Regular.ttf'), 
+      size: 16, 
+      threshold: 0.2 
+    };
+    instructionFonts[1] = { 
+      font: p.loadFont('assets/fonts/rune/Highschool_Runes.ttf'), 
+      size: 16, 
+      threshold: 0.4 
+    };
+    instructionFonts[2] = { 
+      font: p.loadFont('assets/fonts/rune/grace_of_etro.ttf'), 
+      size: 16, 
+      threshold: 0.6 
+    };
+    instructionFonts[3] = { 
+      font: p.loadFont('assets/fonts/rune/Ancient_G_Modern.ttf'), 
+      size: 16, 
+      threshold: 1.0 
+    };
+    
     shockWaveShader = p.loadShader('assets/glsl/main.vert', 'assets/glsl/shock.frag');
   };
 
@@ -57,95 +90,217 @@ export const Maintext = (p) => {
     let centerY = p.height / 2;
     let lineSpacing = 80;
     
-    texts[0].x = centerX;
-    texts[0].y = centerY - lineSpacing;
+    mainTexts[0].x = centerX;
+    mainTexts[0].y = centerY - lineSpacing;
     
-    texts[1].x = centerX;
-    texts[1].y = centerY;
+    mainTexts[1].x = centerX;
+    mainTexts[1].y = centerY;
     
-    texts[2].x = centerX;
-    texts[2].y = centerY + lineSpacing;
+    mainTexts[2].x = centerX;
+    mainTexts[2].y = centerY + lineSpacing;
     
-    texts.forEach(textObj => {
+    mainTexts.forEach(textObj => {
       textObj.sensitivities = Array.from({length: textObj.text.length}, () => p.random(-0.2, 0.2));
     });
+    
+    // Générer sensitivités pour le texte d'instruction
+    let instructionText = "> You can clic anywhere";
+    instructionSensitivities = Array.from({length: instructionText.length}, () => p.random(-0.2, 0.2));
 
     if (withShader) {
       p.shader(shockWaveShader);
       for(let i = 0; i < NUM_SHOCKWAVES; i ++) {
         centres[i] = [0, 0];
         times[i] = 1;
+        sizes[i] = 1.0; // Taille par défaut
       }
     }
 
 
+  };
+
+  // Fonction utilitaire pour sélectionner l'index de police basé sur les thresholds
+  const getFontIndex = (t, fontArray) => {
+    let fontIndex = fontArray.findIndex(fontObj => t < fontObj.threshold);
+    if (fontIndex === -1) fontIndex = fontArray.length - 1;
+    return fontIndex;
+  };
+
+  // Fonction pour détecter si la souris survole un texte
+  const isHoveringText = (text, x, y, spacing) => {
+    let startX = x - (text.length * spacing) / 2 + spacing / 2;
+    let endX = startX + (text.length - 1) * spacing;
+    let textHeight = 40; // Zone de survol approximative
+    
+    return p.mouseX >= startX - spacing/2 && 
+           p.mouseX <= endX + spacing/2 && 
+           p.mouseY >= y - textHeight/2 && 
+           p.mouseY <= y + textHeight/2;
+  };
+
+  // Fonction pour rendre un texte avec sensitivité par lettre et soulignement optionnel
+  const renderText = (text, x, y, spacing, fontArray, sensitivities, color = 80, underlineProgress = 0) => {
+    let startX = x - (text.length * spacing) / 2 + spacing / 2;
+    let maxDist = Math.min(g.width, g.height) / 2;
+
+    for (let i = 0; i < text.length; i++) {
+      let letterX = startX + i * spacing;
+      let letterY = y;
+      let d = g.dist(p.mouseX, p.mouseY, letterX, letterY);
+      let t = g.constrain((d / maxDist) + sensitivities[i], 0, 1);
+
+      let fontIndex = getFontIndex(t, fontArray);
+
+      g.textFont(fontArray[fontIndex].font);
+      g.textSize(fontArray[fontIndex].size);
+      g.fill(color);
+      g.text(text[i], letterX, letterY);
+    }
+    
+    // Dessiner le soulignement basé sur le progress
+    if (underlineProgress > 0) {
+      let startXLine = startX - spacing/2;
+      let endXLine = startX + (text.length - 1) * spacing + spacing/2;
+      let lineWidth = endXLine - startXLine;
+      let currentEndX = startXLine + (lineWidth * underlineProgress);
+      
+      g.stroke(color);
+      g.strokeWeight(1);
+      g.line(startXLine, y + 20, currentEndX, y + 20);
+      g.noStroke();
+    }
+  };
+
+  // Fonction pour rendre tous les textes sur le graphics buffer
+  const renderAllTexts = () => {
+    // Rendre chaque texte central avec gestion du hover et animation
+    mainTexts.forEach(textObj => {
+      let isCurrentlyHovered = isHoveringText(textObj.text, textObj.x, textObj.y, 15);
+      
+      // Gérer le début du hover
+      if (isCurrentlyHovered && !textObj.isHovered) {
+        textObj.isHovered = true;
+        textObj.hoverStartTime = p.millis();
+      }
+      // Gérer la fin du hover
+      else if (!isCurrentlyHovered && textObj.isHovered) {
+        textObj.isHovered = false;
+        textObj.hoverStartTime = 0;
+      }
+      
+      // Calculer le progress de l'animation
+      let underlineProgress = 0;
+      if (textObj.isHovered) {
+        let elapsedTime = p.millis() - textObj.hoverStartTime;
+        let animationDuration = 200; // 200ms pour l'animation complète
+        underlineProgress = Math.min(elapsedTime / animationDuration, 1.0);
+      }
+      
+      renderText(textObj.text, textObj.x, textObj.y, 15, fonts, textObj.sensitivities, 80, underlineProgress);
+    });
+
+    // Texte d'instruction en bas à gauche (pas de soulignement)
+    let instructionText = "> You can clic anywhere";
+    let instructionX = 30 + (instructionText.length * 10) / 2;
+    let instructionY = g.height - 40;
+    
+    renderText(instructionText, instructionX, instructionY, 10, instructionFonts, instructionSensitivities, 100, 0);
+  };
+
+  // Fonction pour générer une onde de choc avec taille variable
+  const generateShockwave = (x, y, size = 1.0) => {
+    centres.shift();
+    times.shift();
+    sizes.shift();
+    centres.push([x / p.width, y / p.height]);
+    times.push(0);
+    sizes.push(size);
+  };
+
+  // Fonction pour détecter et gérer la vitesse de souris
+  const handleMouseSpeed = () => {
+    let deltaX = p.mouseX - previousMouseX;
+    let deltaY = p.mouseY - previousMouseY;
+    let mouseSpeed = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    
+    // Si la vitesse dépasse le seuil et qu'assez de temps s'est écoulé
+    if (mouseSpeed > mouseSpeedThreshold && p.millis() - lastWaveTime > waveDelay) {
+      // Calculer la taille proportionnelle à la vitesse
+      let minSize = 0.04; // Un peu plus visible pour mouvement lent
+      let maxSize = 1.2; // Compromis entre avant et maintenant
+      let normalizedSpeed = Math.min(mouseSpeed / 40, 1.0); // Normaliser sur 40px
+      let waveSize = minSize + (maxSize - minSize) * normalizedSpeed;
+      
+      generateShockwave(p.mouseX, p.mouseY, waveSize);
+      lastWaveTime = p.millis();
+    }
+    
+    // Mettre à jour la position précédente
+    previousMouseX = p.mouseX;
+    previousMouseY = p.mouseY;
+  };
+
+  // Fonction pour mettre à jour et gérer les shockwaves
+  const updateShockwaves = () => {
+    let centresUniform = [];
+    let timesUniform = [];
+    let sizesUniform = [];
+    for(let i = 0; i < NUM_SHOCKWAVES; i ++) {
+      if(times[i] < 1) {
+        times[i] += 0.005; // vitesse de l'onde
+      }
+      centresUniform = centresUniform.concat(centres[i]);
+      timesUniform.push(Math.pow(times[i], 1/1.5));
+      sizesUniform.push(sizes[i]);
+    }
+    
+    shockWaveShader.setUniform("centres", centresUniform);
+    shockWaveShader.setUniform("times", timesUniform);
+    shockWaveShader.setUniform("sizes", sizesUniform);
+  };
+
+  // Fonction pour le rendu avec shader
+  const renderWithShader = () => {
+    console.log("Rendering with shader");
+    shockWaveShader.setUniform("image", g);
+    shockWaveShader.setUniform("aspect", [1, p.width/p.height]);
+    
+    updateShockwaves();
+    
+    p.clear();
+    p.rect(-p.width/2, -p.height/2, p.width, p.height);
+  };
+
+  // Fonction pour le rendu sans shader
+  const renderWithoutShader = () => {
+    console.log("Rendering without shader");
+    p.image(g, 0, 0);
   };
 
   p.draw = () => {
     p.translate(-p.width/2, -p.height/2);
     
-    // Remettre le fond au graphics buffer à chaque frame
+    // Détecter la vitesse de souris et générer des ondes si nécessaire
+    handleMouseSpeed();
+    
+    // Préparer le graphics buffer
     g.background(244, 243, 241);
     p.clear();
 
-    // Rendre chaque texte
-    texts.forEach(textObj => {
-      let spacing = 15;
-      let startX = textObj.x - (textObj.text.length * spacing) / 2 + spacing / 2;
-      
-      let d = g.dist(p.mouseX, p.mouseY, textObj.x, textObj.y);
-      let maxDist = Math.min(g.width, g.height) / 2;
+    // Rendre tous les textes
+    renderAllTexts();
 
-      for (let i = 0; i < textObj.text.length; i++) {
-        let letterX = startX + i * spacing;
-        let letterY = textObj.y;
-        let t = g.constrain((d / maxDist) + textObj.sensitivities[i], 0, 1);
-
-        let fontIndex = fonts.findIndex(fontObj => t < fontObj.threshold);
-        if (fontIndex === -1) fontIndex = fonts.length - 1;
-
-        g.textFont(fonts[fontIndex].font);
-        g.textSize(fonts[fontIndex].size);
-        g.text(textObj.text[i], letterX, letterY);
-      }
-    });
-
-      
-    if (!withShader) {
-      console.log("Rendering without shader");
-      p.image(g, 0, 0); //render g dans p
+    // Choisir le mode de rendu
+    if (withShader) {
+      renderWithShader();
+    } else {
+      renderWithoutShader();
     }
-    else {
-      console.log("Rendering with shader");
-      shockWaveShader.setUniform("image", g);
-      shockWaveShader.setUniform("aspect", [1, p.width/p.height]);
-    
-      let centresUniform = [];
-      let timesUniform = [];
-      for(let i = 0; i < NUM_SHOCKWAVES; i ++) {
-        if(times[i] < 1) {
-          times[i] += 0.005; // vitesse de l'onde
-        }
-        centresUniform = centresUniform.concat(centres[i]);
-        timesUniform.push(Math.pow(times[i], 1/1.5));
-      }
-        
-      shockWaveShader.setUniform("centres", centresUniform);
-      shockWaveShader.setUniform("times", timesUniform);
-        
-      p.clear();
-      p.rect(-p.width/2, -p.height/2, p.width, p.height);
-    }
-
   };
 
   p.mousePressed = () => {
-    // Déclenche une nouvelle onde de choc
-    centres.shift();
-    times.shift();
-    // Corriger les coordonnées : inverser Y pour correspondre au shader
-    centres.push([p.mouseX / p.width, p.mouseY / p.height]);
-    times.push(0);
+    // Déclenche une nouvelle onde de choc au clic
+    generateShockwave(p.mouseX, p.mouseY);
   };
 
 };
