@@ -14,9 +14,9 @@ export const Maintext = (p) => {
   let sizes = new Array(NUM_SHOCKWAVES); // Tailles des ondes
 
   let mainTexts = [
-    { text: "Curriculum vitae", x: 0, y: 0, sensitivities: [], hoverStartTime: 0, isHovered: false },
-    { text: "Soundcloud", x: 0, y: 0, sensitivities: [], hoverStartTime: 0, isHovered: false },
-    { text: "Shaderland", x: 0, y: 0, sensitivities: [], hoverStartTime: 0, isHovered: false }
+    { text: "Curriculum vitae", x: 0, y: 0, sensitivities: [], hoverStartTime: 0, isHovered: false, url: null },
+    { text: "Soundcloud", x: 0, y: 0, sensitivities: [], hoverStartTime: 0, isHovered: false, url: "https://soundcloud.com/meo-sound" },
+    { text: "Shaderland", x: 0, y: 0, sensitivities: [], hoverStartTime: 0, isHovered: false, url: null }
   ];
   
   let instructionSensitivities = [];
@@ -24,7 +24,7 @@ export const Maintext = (p) => {
   // Variables pour la détection de vitesse de souris
   let previousMouseX = 0;
   let previousMouseY = 0;
-  let mouseSpeedThreshold = 5; // Seuil de vitesse pour générer des ondes (plus sensible)
+  let mouseSpeedThreshold = 7; // Seuil de vitesse pour générer des ondes (un peu moins sensible)
   let lastWaveTime = 0;
   let waveDelay = 75; // Délai minimum entre les ondes auto-générées (ms) - compromis
 
@@ -45,7 +45,7 @@ export const Maintext = (p) => {
       threshold: 0.95 
     };
     fonts[3] = { 
-      font: p.loadFont('assets/fonts/rune/DARUNE.otf'), 
+      font: p.loadFont('assets/fonts/rune/Ancient_G_Modern.ttf'), 
       size: 35, 
       threshold: 1.0 
     };
@@ -117,6 +117,12 @@ export const Maintext = (p) => {
     }
 
 
+  };
+
+  // Fonction smoothstep pour courbes douces (équivalent GLSL)
+  const smoothstep = (edge0, edge1, x) => {
+    let t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+    return t * t * (3 - 2 * t);
   };
 
   // Fonction utilitaire pour sélectionner l'index de police basé sur les thresholds
@@ -225,11 +231,34 @@ export const Maintext = (p) => {
     
     // Si la vitesse dépasse le seuil et qu'assez de temps s'est écoulé
     if (mouseSpeed > mouseSpeedThreshold && p.millis() - lastWaveTime > waveDelay) {
-      // Calculer la taille proportionnelle à la vitesse
-      let minSize = 0.04; // Un peu plus visible pour mouvement lent
+      // Calculer la taille proportionnelle à la vitesse avec courbe smoothstep
+      let minSize = 0.0; // Un peu plus visible pour mouvement lent
       let maxSize = 1.2; // Compromis entre avant et maintenant
-      let normalizedSpeed = Math.min(mouseSpeed / 40, 1.0); // Normaliser sur 40px
-      let waveSize = minSize + (maxSize - minSize) * normalizedSpeed;
+      let normalizedSpeed = Math.min(mouseSpeed / 35, 1.0); // Normaliser sur 35px
+      
+      // Système à 4 états comme les thresholds des polices
+      // Tu peux modifier ces valeurs pour ajuster les transitions :
+      let threshold1 = 0.6; // Seuil vitesse lente → moyen-lente
+      let threshold2 = 0.8; // Seuil moyen-lente → moyen-rapide  
+      let threshold3 = 0.9; // Seuil moyen-rapide → rapide
+      
+      let waveSize;
+      if (normalizedSpeed < threshold1) {
+        // État 1: Très lent - onde minimale
+        waveSize = minSize;
+      } else if (normalizedSpeed < threshold2) {
+        // État 2: Moyen-lent - transition douce
+        let t = smoothstep(threshold1, threshold2, normalizedSpeed);
+        waveSize = minSize + (maxSize * 0.0003 - minSize) * t;
+      } else if (normalizedSpeed < threshold3) {
+        // État 3: Moyen-rapide - transition plus marquée
+        let t = smoothstep(threshold2, threshold3, normalizedSpeed);
+        waveSize = maxSize * 0.1 + (maxSize * 0.5 - maxSize * 0.2) * t;
+      } else {
+        // État 4: Rapide - taille maximale
+        let t = smoothstep(threshold3, 1.0, normalizedSpeed);
+        waveSize = maxSize * 0.8 + (maxSize - maxSize * 0.9) * t;
+      }
       
       generateShockwave(p.mouseX, p.mouseY, waveSize);
       lastWaveTime = p.millis();
@@ -299,7 +328,16 @@ export const Maintext = (p) => {
   };
 
   p.mousePressed = () => {
-    // Déclenche une nouvelle onde de choc au clic
+    // Vérifier si on clique sur un mainText avec URL
+    for (let textObj of mainTexts) {
+      let isClicked = isHoveringText(textObj.text, textObj.x, textObj.y, 15);
+      if (isClicked && textObj.url) {
+        window.open(textObj.url, '_blank');
+        return; // Sortir pour éviter l'onde de choc
+      }
+    }
+    
+    // Si pas de clic sur texte, déclencher une onde de choc normale
     generateShockwave(p.mouseX, p.mouseY);
   };
 
