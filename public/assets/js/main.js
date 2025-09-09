@@ -2,6 +2,7 @@
 import { Particles } from '../../../src/sketches/particles/particles.js';
 import { Mainshader } from '../../../src/sketches/mainshader/mainshader.js';
 import { Maintext } from '../../../src/sketches/maintext/maintext.js';
+import { Testfont } from '../../../src/sketches/testfont/testfont.js';
 
 
 import { initExpandable, toggleExpandableItem } from '../../../src/ui/expandable.js';
@@ -20,8 +21,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   
   // Initialisation des sketchs p5.js
   //new window.p5(Particles, 'particles-container');
-  new window.p5(Mainshader, 'mainshader-container');
+  //new window.p5(Mainshader, 'mainshader-container');
   new window.p5(Maintext, 'maintext-container');
+  //new window.p5(Testfont, 'testfont-container');
 
   // Initialisation des composants UI
   initExpandable();

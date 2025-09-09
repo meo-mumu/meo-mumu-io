@@ -573,20 +573,6 @@ h1.page-intro {
   overflow: hidden;
 }
 
-/* Canvas Mainshader en arrière-plan */
-.mainshader-container {
-  width: 100vw;
-  height: 100vh;
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin: 0;
-  padding: 0;
-  border: none;
-  background: rgb(245, 235, 220); /* Fond gris */
-  z-index: 1;
-  overflow: hidden;
-}
 
 /* Canvas MainText au premier plan */
 .maintext-container {
@@ -598,7 +584,23 @@ h1.page-intro {
   margin: 0;
   padding: 0;
   border: none;
-  background: transparent;
+  background: rgb(244, 243, 241); /* Fond gris */
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: all;
+}
+
+/* Canvas Testfont */
+.testfont-container {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: rgb(244, 243, 241); /* Fond gris */
   z-index: 2;
   overflow: hidden;
   pointer-events: all;
@@ -615,7 +617,7 @@ h1.page-intro {
 .conway-button {
   background: linear-gradient(135deg, rgba(122, 155, 115, 0.1), rgba(122, 155, 115, 0.05));
   border: 1px solid rgba(122, 155, 115, 0.3);
-  color: #7A9B73;
+  color: hsl(109, 17%, 53%);
   padding: 0.4em 1em;
   font-size: 0.85em;
   border-radius: 3px;
