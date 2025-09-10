@@ -6,7 +6,7 @@ varying vec2 vTexCoord;
 uniform sampler2D tex;
 uniform vec2 normalRes;
 
-void mainConway() {
+void main() {
   vec2 uv = vTexCoord;
   
   uv.y = 1.0 - uv.y;
