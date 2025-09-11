@@ -277,7 +277,7 @@ const MainPage = (p) => {
     });
 
     // Render instruction text
-    let instructionText = "> Clic to copy my email adress";
+    let instructionText = "> Do not hesitate to overuse the falcon punch";
     let instructionX = 30 + (instructionText.length * 10) / 2;
     let instructionY = g.height - 40;
     renderText(instructionText, instructionX, instructionY, 10, instructionFonts, instructionSensitivities, 100, 0);
