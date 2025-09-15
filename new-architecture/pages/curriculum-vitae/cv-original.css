@@ -1,0 +1,355 @@
+/* === Variables === */
+:root {
+  --cv-bg: #fff;
+  --cv-accent: #4A6B44;
+  --cv-accent-light: rgba(74, 107, 68, 0.15);
+  --cv-accent-bg: rgba(220, 239, 220, 0.12);
+  --cv-shadow: 0 0 40px rgba(0,0,0,0.05);
+  --cv-radius: 12px;
+  --cv-padding: 2em;
+  --cv-gap: 1em;
+  --cv-title-size: 2.3em;
+  --cv-section-size: 1.3em;
+  --cv-job-size: 1.7em;
+  --cv-font: "Segoe UI", "Roboto", "Arial", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* === Container === */
+.cv-container {
+  position: fixed;
+  top: 3rem; bottom: 3rem; left: 0; right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  background: transparent;
+  transition: opacity 0.3s;
+}
+.cv-container.active { opacity: 1; }
+
+.cv-content {
+  width: 90vw; max-width: 1200px; min-width: 320px;
+  max-height: calc(100vh - 6rem);
+  background: var(--cv-bg);
+  box-shadow: var(--cv-shadow);
+  border-radius: var(--cv-radius);
+  border: 1px solid var(--cv-accent-light);
+  padding: var(--cv-padding);
+  overflow-y: auto;
+  margin: auto;
+  font-family: var(--cv-font);
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+
+/* === Header === */
+.cv-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
+  margin-bottom: 1em;
+}
+
+.cv-header-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--cv-gap);
+}
+
+.cv-header-left-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8em;
+  flex: 1;
+}
+
+.cv-name {
+  font-size: var(--cv-title-size);
+  font-weight: bold;
+  color: #222;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+}
+
+.cv-job-title {
+  font-size: var(--cv-job-size);
+  color: var(--cv-accent);
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.cv-header-photo-block {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cv-photo {
+  width: 120px; height: 120px;
+  object-fit: cover;
+  border-radius: var(--cv-radius);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.cv-contact-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-size: 1.1em;
+  color: #444;
+  flex-wrap: wrap;
+}
+
+.cv-contact-separator {
+  color: var(--cv-accent);
+}
+
+.cv-contact-item a {
+  color: var(--cv-accent);
+  text-decoration: none;
+}
+.cv-contact-item a:hover {
+  text-decoration: underline;
+}
+
+.cv-header-description {
+  font-size: 1em;
+  color: #222;
+  letter-spacing: 0.01em;
+  margin-bottom: 0.01em;
+  text-align: justify;
+}
+
+/* === Sections === */
+.cv-section {
+  font-size: var(--cv-section-size);
+  font-weight: 600;
+  color: var(--cv-accent);
+  margin: 1em 0 0.8em 0;
+  padding-top: 0.5em;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+.cv-section::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--cv-accent-light);
+  margin-left: 1em;
+}
+.cv-section:first-child {
+  margin-top: 0.5em;
+  padding-top: 0;
+}
+
+/* === Entries === */
+.cv-entry {
+  margin-bottom: 1em;
+  background: var(--cv-accent-bg);
+  padding: 0.8em 1.2em;
+  border-radius: 8px;
+  border-left: 3px solid var(--cv-accent-light);
+}
+
+.cv-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.8em;
+}
+
+.cv-dates {
+  font-family: 'SF Mono', 'Monaco', monospace;
+  min-width: 120px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2em;
+}
+
+.cv-years {
+  font-size: 0.9em;
+  color: var(--cv-accent);
+  font-weight: 500;
+}
+
+.cv-duration {
+  font-size: 0.75em;
+  color: var(--cv-accent);
+  opacity: 0.7;
+}
+
+.cv-title {
+  font-weight: 600;
+  color: #222;
+  flex: 1;
+}
+
+.cv-freelance {
+  color: #888;
+  font-weight: 400;
+}
+
+.cv-company {
+  color: var(--cv-accent);
+  font-weight: 500;
+  text-align: right;
+  margin-left: auto;
+}
+
+.cv-entry-description {
+  margin-left: 150px;
+  margin-top: -1.5em;
+}
+
+.cv-entry-description .sub-bullet {
+  font-size: 0.95em;
+  line-height: 1.4;
+  color: #333;
+  margin: 0.2em 0;
+  text-indent: 1em;
+}
+
+/* === Skills === */
+.cv-skills-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2em;
+  margin-bottom: 1em;
+}
+
+.cv-skills-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  flex-wrap: wrap;
+  border-left: 2px solid var(--cv-accent-light);
+  padding-left: 1em;
+}
+
+.cv-skill-inline-header {
+  font-size: 0.9em;
+  font-weight: 600;
+  color: #666;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  width: 180px;
+  flex-shrink: 0;
+  margin-right: 1em;
+}
+
+.cv-skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5em;
+  margin-bottom: 1em;
+  align-items: start;
+}
+
+.cv-skill-category {
+  border-left: 2px solid var(--cv-accent-light);
+  padding-left: 1em;
+  margin-bottom: 1em;
+}
+
+.cv-skill-header {
+  font-size: 0.95em;
+  font-weight: 600;
+  color: var(--cv-accent);
+  margin-bottom: 0.6em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cv-skill-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  align-items: center;
+}
+
+.cv-skill-tag {
+  background: var(--cv-accent-bg);
+  color: #333;
+  padding: 0.4em 0.8em;
+  border-radius: 20px;
+  font-size: 0.85em;
+  font-weight: 500;
+  border: 1px solid var(--cv-accent-light);
+  transition: all 0.2s;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+.cv-skill-tag:hover {
+  background: var(--cv-accent-light);
+  border-color: var(--cv-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px var(--cv-accent-light);
+}
+
+/* === Interests === */
+.cv-interests {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2em;
+  margin-bottom: 1em;
+}
+
+.cv-interest-line {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  flex-wrap: wrap;
+  border-left: 2px solid var(--cv-accent-light);
+  padding-left: 1em;
+}
+
+.cv-interest-category {
+  font-size: 0.9em;
+  font-weight: 600;
+  color: #666;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  width: 180px;
+  flex-shrink: 0;
+  margin-right: 1em;
+}
+
+.cv-interest-item {
+  background: var(--cv-accent-bg);
+  color: #333;
+  padding: 0.4em 0.8em;
+  border-radius: 20px;
+  font-size: 0.85em;
+  font-weight: 500;
+  border: 1px solid var(--cv-accent-light);
+  transition: all 0.2s;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.cv-interest-item:hover {
+  background: var(--cv-accent-light);
+  border-color: var(--cv-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px var(--cv-accent-light);
+}
+
+/* === Responsive === */
+@media (max-width: 1024px) {
+  .cv-content { max-width: 98vw; max-height: 92vh; padding: 1em; }
+  .cv-header-top-row { flex-direction: column; gap: 1em; }
+  .cv-header-photo-block { justify-content: flex-start; margin-top: 1em; }
+  .cv-entry-description { margin-left: 0; }
+  .cv-main { flex-direction: column; gap: 0.4em; }
+}
+
+@media (max-width: 600px) {
+  .cv-content { padding: 0.5em; }
+  .cv-photo { width: 80px; height: 80px; }
+  .cv-header { gap: 1em; }
+  .cv-section { font-size: 1.1em; }
+  .cv-job-title { font-size: 1.2em; }
+}
