@@ -39,11 +39,11 @@ void main() {
     }
   }
   
-  // Fond gris (245, 235, 220), cellules noires
-  vec3 fondGris = vec3(0.96, 0.92, 0.86); // RGB(245, 235, 220) normalisé
+  // Fond brain.js (244, 243, 241), cellules noires
+  vec3 fondBrain = vec3(244.0/255.0, 243.0/255.0, 241.0/255.0); // Couleur brain.js
   vec3 celluleNoire = vec3(0.0, 0.0, 0.0); // Noir
-  
-  // a = 1 pour cellules vivantes (noir), a = 0 pour fond (gris)
-  vec3 color = mix(fondGris, celluleNoire, a);
+
+  // a = 1 pour cellules vivantes (noir), a = 0 pour fond transparent
+  vec3 color = mix(fondBrain, celluleNoire, a);
   gl_FragColor = vec4(color, 1.0);
 }

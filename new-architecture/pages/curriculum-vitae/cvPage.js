@@ -3,7 +3,7 @@
  * Réutilise cv.html et cv.css existants avec animation minimaliste
  */
 
-export class CVPage {
+class CVPage {
   constructor() {
     this.p = null;
     this.isActive = false;
@@ -115,8 +115,8 @@ export class CVPage {
 
   close() {
     // Méthode séparée pour la fermeture manuelle (Escape, clic extérieur)
-    if (window.brain) {
-      window.brain.switchTo('mainPage');
+    if (window.switchTo) {
+      window.switchTo('mainPage');
     }
   }
 

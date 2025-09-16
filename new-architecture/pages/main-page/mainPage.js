@@ -3,28 +3,24 @@
  * Affiche les textes de navigation avec MysteriousText
  */
 
-import { MysteriousText } from '../../ressources/mysterious-text/mysterious-text.js';
-
-export class MainPage {
+class MainPage {
   constructor() {
-    this.p = null;
     this.mysteriousText = null;
     this.isActive = false;
     this.mainTexts = [];
     this.debugFont = null;
   }
 
-  preload(p) {
+  preload() {
     // Charger les polices en preload (obligatoire pour WEBGL)
-    this.debugFont = p.loadFont('ressources/fonts/CourierPrime-Regular.ttf');
+    this.debugFont = loadFont('ressources/fonts/CourierPrime-Regular.ttf');
 
     // Précharger MysteriousText avec polices runiques
-    this.mysteriousText = new MysteriousText(p);
+    this.mysteriousText = new MysteriousText();
     this.mysteriousText.preload();
   }
 
-  init(p) {
-    this.p = p;
+  init() {
 
     // Initialiser MysteriousText (déjà créé en preload)
     this.mysteriousText.init();
@@ -36,7 +32,7 @@ export class MainPage {
   }
 
   setupMainTexts() {
-    const center = { x: this.p.width / 2, y: this.p.height / 2 };
+    const center = { x: width / 2, y: height / 2 };
     const lineSpacing = 80;
 
     // Configuration des textes avec leurs actions
@@ -111,19 +107,25 @@ export class MainPage {
   }
 
   handleTextClick(textObj) {
-    // Déclencher animation shockwave via Brain
-    const shockwave = window.brain.getShockwave();
+    // Déclencher animation shockwave
+    const shockwave = window.getShockwave();
     if (shockwave?.isInitialized) {
       shockwave.triggerBigShockwaveAnimation();
     }
 
     if (textObj.action === "cv") {
       console.log('🔗 Navigate to CV');
-      window.brain.switchTo('cvPage');
+      window.switchTo('cvPage');
     } else if (textObj.action === "shaderland") {
       console.log('<� Navigate to Shaderland');
-      // TODO: Navigation vers Shaderland
-      // window.brain.switchTo('shaderland');
+      if (shockwave?.isInitialized) {
+        shockwave.triggerBigShockwaveAnimation();
+        setTimeout(() => {
+          window.switchTo('shaderland');
+        }, 1000);
+      } else {
+        window.switchTo('shaderland');
+      }
     } else if (textObj.url) {
       console.log('= Opening URL:', textObj.url);
       window.open(textObj.url, '_blank');
