@@ -1,17 +1,21 @@
-/**
- * MysteriousText - Ressource d'affichage de texte avec polices progressives
- * Texte qui change de police selon la distance de la souris
- */
-
 class MysteriousText {
-  constructor() {
-    this.fonts = [];
-    this.isInitialized = false;
+  constructor(text, pos, spacing, color) {
+    this.text = text;
+    this.pos = pos;
+    this.spacing = spacing;
+    this.color = color;
+    this.sensitivities = Array.from({length: text.length}, () => (Math.random() - 0.5) * 0.4);
+    this.hoverStartTime = 0;
+    this.isHovered = false;
+    this.underlineProgress = 0;
+    this.mysteriousFonts = null;
+    this.preloadFont();
   }
 
-  preload() {
+ 
+  preloadFont() {
     // Charger toutes les polices en preload
-    this.fonts = [
+    this.mysteriousFonts = [
       {
         font: loadFont('ressources/fonts/CourierPrime-Regular.ttf'),
         size: 25,
@@ -35,132 +39,87 @@ class MysteriousText {
     ];
   }
 
-  init() {
-    // Les polices sont déjà chargées en preload
-    this.isInitialized = true;
-  }
 
-  /**
-   * Cr�e un objet texte avec ses propri�t�s
-   * @param {string} text - Le texte � afficher
-   * @param {number} x - Position X
-   * @param {number} y - Position Y
-   * @param {number} spacing - Espacement entre lettres
-   * @param {number} color - Couleur du texte
-   * @returns {Object} - Objet textObj
-   */
-  createTextObj(text, x, y, spacing = 15, color = 80) {
-    return {
-      text: text,
-      x: x,
-      y: y,
-      spacing: spacing,
-      color: color,
-      sensitivities: Array.from({length: text.length}, () => (Math.random() - 0.5) * 0.4),
-      hoverStartTime: 0,
-      isHovered: false,
-      underlineProgress: 0
-    };
-  }
-
-  /**
-   * V�rifie si la souris survole le texte
-   */
-  isHoveringText(textObj) {
-    const startX = textObj.x - (textObj.text.length * textObj.spacing) / 2 + textObj.spacing / 2;
-    const endX = startX + (textObj.text.length - 1) * textObj.spacing;
+  isHoveringText() {
+    const startX = this.pos.x - (this.text.length * this.spacing) / 2 + this.spacing / 2;
+    const endX = startX + (this.text.length - 1) * this.spacing;
     const textHeight = 40;
 
-    return mouseX >= startX - textObj.spacing/2 &&
-           mouseX <= endX + textObj.spacing/2 &&
-           mouseY >= textObj.y - textHeight/2 &&
-           mouseY <= textObj.y + textHeight/2;
+    return mouseX >= startX - this.spacing/2 &&
+           mouseX <= endX + this.spacing/2 &&
+           mouseY >= this.pos.y - textHeight/2 &&
+           mouseY <= this.pos.y + textHeight/2;
   }
 
-  /**
-   * S�lectionne la police selon la distance et le seuil
-   */
+
   getFontIndex(t) {
-    let fontIndex = this.fonts.findIndex(fontObj => t < fontObj.threshold);
-    if (fontIndex === -1) fontIndex = this.fonts.length - 1;
+    let fontIndex = this.mysteriousFonts.findIndex(fontObj => t < fontObj.threshold);
+    if (fontIndex === -1) fontIndex = this.mysteriousFonts.length - 1;
     return fontIndex;
   }
 
-  /**
-   * Rendu du texte avec effets myst�rieux
-   */
-  render(textObj, graphics = null) {
-    if (!this.isInitialized) return;
-
-    // Utiliser le graphics buffer si fourni, sinon les fonctions globales
-    const g = graphics || window;
-
+  render() {
+    
     // Gestion du hover et underline
-    const isCurrentlyHovered = this.isHoveringText(textObj);
+    const isCurrentlyHovered = this.isHoveringText();
 
-    if (isCurrentlyHovered && !textObj.isHovered) {
-      textObj.isHovered = true;
-      textObj.hoverStartTime = millis();
-    } else if (!isCurrentlyHovered && textObj.isHovered) {
-      textObj.isHovered = false;
-      textObj.hoverStartTime = 0;
+    if (isCurrentlyHovered && !this.isHovered) {
+      this.isHovered = true;
+      this.hoverStartTime = millis();
+    } else if (!isCurrentlyHovered && this.isHovered) {
+      this.isHovered = false;
+      this.hoverStartTime = 0;
     }
 
     // Animation underline
-    if (textObj.isHovered) {
-      let elapsedTime = millis() - textObj.hoverStartTime;
+    if (this.isHovered) {
+      let elapsedTime = millis() - this.hoverStartTime;
       let animationDuration = 200;
-      textObj.underlineProgress = Math.min(elapsedTime / animationDuration, 1.0);
+      this.underlineProgress = Math.min(elapsedTime / animationDuration, 1.0);
     } else {
-      textObj.underlineProgress = 0;
+      this.underlineProgress = 0;
     }
 
     // Rendu lettre par lettre
-    this.renderLetters(textObj, g);
+    this.renderLetters();
 
     // Rendu underline
-    if (textObj.underlineProgress > 0) {
-      this.renderUnderline(textObj, g);
+    if (this.underlineProgress > 0) {
+      this.renderUnderline();
     }
   }
 
-  /**
-   * Rendu des lettres avec police progressive
-   */
-  renderLetters(textObj, g) {
-    const startX = textObj.x - (textObj.text.length * textObj.spacing) / 2 + textObj.spacing / 2;
-    const maxDist = Math.min(g.width, g.height) / 2;
+  renderLetters() {
+    const startX = this.pos.x - (this.text.length * this.spacing) / 2 + this.spacing / 2;
+    const maxDist = Math.min(graphic.width, graphic.height) / 2;
 
-    g.textAlign(g.CENTER, g.CENTER);
+    // textAlign déjà configuré dans initGraphics()
 
-    for (let i = 0; i < textObj.text.length; i++) {
-      const letterX = startX + i * textObj.spacing;
-      const letterY = textObj.y;
-      const d = g.dist(mouseX, mouseY, letterX, letterY);
-      const t = g.constrain((d / maxDist) + textObj.sensitivities[i], 0, 1);
+    for (let i = 0; i < this.text.length; i++) {
+      const letterX = startX + i * this.spacing;
+      const letterY = this.pos.y;
+      const d = graphic.dist(mouseX, mouseY, letterX, letterY);
+      const t = graphic.constrain((d / maxDist) + this.sensitivities[i], 0, 1);
 
       const fontIndex = this.getFontIndex(t);
 
-      g.textFont(this.fonts[fontIndex].font);
-      g.textSize(this.fonts[fontIndex].size);
-      g.fill(textObj.color);
-      g.text(textObj.text[i], letterX, letterY);
+      graphic.textFont(this.mysteriousFonts[fontIndex].font);
+      graphic.textSize(this.mysteriousFonts[fontIndex].size);
+      graphic.fill(this.color.r, this.color.g, this.color.b);
+      graphic.text(this.text[i], letterX, letterY);
     }
   }
 
-  /**
-   * Rendu de la ligne de soulignement
-   */
-  renderUnderline(textObj, g) {
-    const startX = textObj.x - (textObj.text.length * textObj.spacing) / 2 + textObj.spacing / 2;
-    const startXLine = startX - textObj.spacing/2;
-    const endXLine = startX + (textObj.text.length - 1) * textObj.spacing + textObj.spacing/2;
+  renderUnderline(g) {
+    const startX = this.pos.x - (this.text.length * this.spacing) / 2 + this.spacing / 2;
+    const startXLine = startX - this.spacing/2;
+    const endXLine = startX + (this.text.length - 1) * this.spacing + this.spacing/2;
     const lineWidth = endXLine - startXLine;
-    const currentEndX = startXLine + (lineWidth * textObj.underlineProgress);
+    const currentEndX = startXLine + (lineWidth * this.underlineProgress);
 
-    g.stroke(textObj.color);
-    g.strokeWeight(1);
-    g.line(startXLine, textObj.y + 20, currentEndX, textObj.y + 20);
-    g.noStroke();
+    graphic.stroke(this.color.r, this.color.g, this.color.b);
+    graphic.strokeWeight(1);
+    graphic.line(startXLine, this.pos.y + 20, currentEndX, this.pos.y + 20);
+    graphic.noStroke();
   }
 }

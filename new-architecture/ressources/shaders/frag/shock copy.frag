@@ -14,10 +14,8 @@ uniform vec2[NUM_SHOCKWAVES] centres;
 uniform float[NUM_SHOCKWAVES] times;
 uniform float[NUM_SHOCKWAVES] sizes;
 
-// Uniforms pour les modes spéciaux
+// Nouveau uniform pour activer l'effacement
 uniform float isErasing;
-uniform float isAppearing;
-uniform float appearProgress;
 
 const float maxRadius = 0.5;
 
@@ -108,31 +106,17 @@ void main() {
   vec3 darkColor = vec3(0.539, 0.530, 0.735);
   vec3 waveColor = mix(baseColor, darkColor, clamp(abs(shading), 0.0, 1.0));
 
-  // Gestion des modes spéciaux
-  vec3 finalColor = waveColor;
-  float finalAlpha = 1.0;
-
-  // Mode effacement
-  if (isErasing > 0.5 && totalErasure > 0.01) {
+  // Mode normal : exactement comme avant
+  // OU mode effacement mais sans effacement réel
+  if (isErasing < 0.5 || totalErasure < 0.01) {
+    colour = vec4(waveColor, 1.0);
+  } else {
+    // Mode effacement : mélanger avec la couleur de background au lieu de transparence
     totalErasure = clamp(totalErasure, 0.0, 1.0);
     vec3 backgroundColor = vec3(0.957, 0.953, 0.945); // 244, 243, 241 en normalized
-    finalColor = mix(waveColor, backgroundColor, totalErasure);
+    vec3 finalColor = mix(waveColor, backgroundColor, totalErasure);
+    colour = vec4(finalColor, 1.0);
   }
-
-  // Mode apparition (priorité sur effacement)
-  if (isAppearing > 0.5) {
-    // Effet de révélation depuis le centre
-    vec2 center = vec2(0.5, 0.5);
-    float distToCenter = length(correctedPos - center);
-
-    // Révélation progressive basée sur la distance au centre
-    float revealThreshold = appearProgress * 1.5; // Facteur pour contrôler la vitesse
-    float reveal = smoothstep(revealThreshold, revealThreshold + 0.3, 1.0 - distToCenter);
-
-    finalAlpha = reveal;
-  }
-
-  colour = vec4(finalColor, finalAlpha);
 }
 
 

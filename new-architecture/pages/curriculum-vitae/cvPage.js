@@ -5,18 +5,16 @@
 
 class CVPage {
   constructor() {
-    this.p = null;
     this.isActive = false;
     this.cvContainer = null;
     this.portalElement = null;
   }
 
-  preload(p) {
+  preload() {
     // Rien à précharger, utilise les ressources existantes
   }
 
-  init(p) {
-    this.p = p;
+  init() {
     this.setupHTML();
     this.setupEventListeners();
     console.log('📄 CVPage initialized');
@@ -115,17 +113,46 @@ class CVPage {
 
   close() {
     // Méthode séparée pour la fermeture manuelle (Escape, clic extérieur)
-    if (window.switchTo) {
-      window.switchTo('mainPage');
+    switchTo('mainPage');
+  }
+
+  // Méthode principale de rendu
+  render() {
+    if (!this.isActive) return;
+
+    // CVPage peut choisir d'utiliser Shockwave ou pas
+    // Pour l'instant, on désactive Shockwave pour CVPage (HTML pur)
+    // Mais on pourrait l'activer pour des transitions spéciales
+
+    if (false && shockwave?.isInitialized) {
+      // Option future : Shockwave avec overlay HTML
+      shockwave.beginRender(graphics);
+      this.renderContent(graphics);
+      shockwave.endRender();
+    } else {
+      // Mode actuel : Pas de Shockwave, CVPage est en HTML pur
+      this.renderFallback();
     }
   }
 
-  renderToGraphics(graphics) {
-    // CVPage ne rend rien sur le buffer graphics - tout en HTML
+  // Méthode interne : rendu du contenu sur graphics buffer (vide pour CVPage)
+  renderContent(graphics) {
+    // CVPage pourrait dessiner un fond ou des éléments p5.js ici si besoin
   }
 
-  renderToCanvas(p) {
-    // CVPage ne rend rien sur le canvas - tout en HTML
+  // Méthode interne : rendu fallback (CVPage = HTML, donc background simple)
+  renderFallback() {
+    background(244, 243, 241);
+    // CVPage affiche son contenu via HTML/CSS, pas p5.js
+  }
+
+  // Anciennes méthodes maintenues pour compatibilité
+  renderToGraphics(graphics) {
+    this.renderContent(graphics);
+  }
+
+  renderToCanvas() {
+    this.renderFallback();
   }
 
   // Méthode de compatibilité

@@ -1,78 +1,40 @@
-/**
- * Brain.js - Orchestrateur principal du portfolio
- * Fonctions p5.js globales pour gérer l'instance unique et la navigation entre les Pages
- */
-
-// Toutes les classes sont maintenant globales - plus d'imports nécessaires
-
-// Variables globales du module
+let shockwave = null;
+let herald = null;
 let activePage = null;
 let pages = new Map();
-let shockwave = null;
-let graphics = null;
-
+let graphic = null;
 function preload() {
-  // Précharger les ressources communes
   shockwave = new Shockwave();
-  shockwave.preload();
-
-  // Enregistrer et précharger les Pages
-  pages.set('mainPage', new MainPage());
-  pages.set('cvPage', new CVPage());
-  pages.set('shaderland', new ShaderLand());
-
-  // Les pages se chargent en preload pour les fonts
-  for (let page of pages.values()) {
-    page.preload();
-  }
 }
 
 function setup() {
   let canvas = createCanvas(windowWidth, windowHeight, WEBGL);
   canvas.parent('p5-container');
   background(244, 243, 241);
+  graphic = createGraphics(width, height);
+  graphic.textAlign(graphic.CENTER, graphic.CENTER);
+  graphic.fill(80, 80, 80);
+  graphic.noStroke();
 
-  // Créer le graphics buffer centralisé
-  graphics = createGraphics(width, height);
-  graphics.textAlign(CENTER, CENTER);
-  graphics.fill(80);
+  // Position Herald en bas à gauche, en tenant compte de la translation WEBGL
+  herald = new Herald(50, height - 50);
 
-  // Initialiser les ressources communes
-  shockwave.init();
-
-  // Initialiser les pages après setup
-  for (let page of pages.values()) {
-    page.init();
-  }
-  // Démarrer avec la MainPage
+  pages.set('mainPage', new MainPage());
+  // pages.set('cvPage', new CVPage());
+  // pages.set('shaderland', new ShaderLand());
   switchTo('mainPage');
 }
 
 function draw() {
   translate(-width/2, -height/2);
+  background(244, 243, 241);
+  clear();
+  graphic.background(244, 243, 241);
+  herald.update();
+  herald.render();
+  activePage.render();
+  shockwave.render();
 
-  //console.log('draw')
-  
-
-  // Rendu du background commun avec shockwave
-  if (shockwave?.isInitialized) {
-    shockwave.beginRender(graphics);
-
-    // La page active rend son contenu sur le buffer graphics
-    if (activePage) {
-      activePage.renderToGraphics(graphics);
-    }
-
-    // Finaliser avec le shader shockwave
-    shockwave.endRender();
-  } else {
-    // Version fallback sans shader
-    console.log('🧠 [DEBUG] Using fallback render (no shockwave)');
-    background(244, 243, 241);
-    if (activePage) {
-      activePage.renderToCanvas();
-    }
-  }
 }
 
 function windowResized() {
@@ -85,41 +47,26 @@ function mousePressed() {
   }
 }
 
-// Fonctions utilitaires exportées
 function switchTo(pageName) {
-  console.log('🧠 [DEBUG] switchTo(' + pageName + ')');
-
-  // Masquer la page actuelle
   if (activePage) {
-    console.log('🧠 [DEBUG] Hiding current page:', activePage.constructor.name);
-    activePage.hide();
+    console.log('Hiding current page:', pageName);
+    // Temporairement désactivé pour éviter conflit avec animation d'apparition
+    // activePage.hide();
   }
-
-  // Activer la nouvelle page
   activePage = pages.get(pageName);
   if (activePage) {
-    console.log('🧠 [DEBUG] Showing new page:', activePage.constructor.name);
-    activePage.show();
+    console.log('Appear new page:', pageName);
+    activePage.isAppear = true;
   } else {
-    console.log('🧠 [ERROR] Page not found:', pageName);
+    console.log('[ERROR] Page not found:', pageName);
   }
 }
 
-function getShockwave() {
-  return shockwave;
+function sleep(millisecondsDuration)
+{
+  return new Promise((resolve) => {
+    setTimeout(resolve, millisecondsDuration);
+  })
 }
 
-function getGraphics() {
-  return graphics;
-}
-
-// Exposer les fonctions globalement pour les pages
-window.switchTo = switchTo;
-window.getShockwave = getShockwave;
-window.getGraphics = getGraphics;
-
-// p5.js détecte automatiquement les fonctions globales
-// Le canvas est attaché au conteneur via canvas.parent() dans setup()
-// PLUS BESOIN de new p5() - p5.js trouve les fonctions globales automatiquement
-
-console.log('🧠 Brain initialized with global p5.js functions');
+console.log('Brain initialized with global p5.js functions');

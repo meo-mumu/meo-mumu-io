@@ -3,10 +3,6 @@ class Shockwave {
     this.shader = loadShader('ressources/shaders/vert/main-v3.vert', 'ressources/shaders/frag/shock.frag');
     this.isErasing = false;
 
-    // Mode apparition
-    this.isAppearing = false;
-    this.appearProgress = 0.0;
-
     // Configuration shockwave
     this.NUM_SHOCKWAVES = 10;
     this.centres = new Array(this.NUM_SHOCKWAVES);
@@ -32,7 +28,7 @@ class Shockwave {
     }
   }
 
-  render() {
+  render(graphics) {
     this.handleMouseSpeed();
 
     let centresUniform = [];
@@ -52,17 +48,16 @@ class Shockwave {
     this.shader.setUniform("centres", centresUniform);
     this.shader.setUniform("times", timesUniform);
     this.shader.setUniform("sizes", sizesUniform);
-    this.shader.setUniform("image", graphic);
+    this.shader.setUniform("image", graphics);
     this.shader.setUniform("aspect", [1, width/height]);
-    
-    // Uniforms pour l'apparition
-    let appearingValue = this.isAppearing ? 1.0 : 0.0;
-    this.shader.setUniform("isAppearing", appearingValue);
-    this.shader.setUniform("appearProgress", this.appearProgress);
-    
-    // Uniforms pour l'effacement
+
+    // Nouveau uniform pour l'effacement
     let erasingValue = this.isErasing ? 1.0 : 0.0;
+    if (erasingValue > 0.5) {
+      console.log('⚡ Shader: isErasing =', erasingValue);
+    }
     this.shader.setUniform("isErasing", erasingValue);
+
     rect(-width/2, -height/2, width, height);
 
   }
@@ -115,38 +110,9 @@ class Shockwave {
   }
 
   async triggerAppearingShockwave() {
-    // Activer le mode apparition
-    this.isAppearing = true;
-    this.appearProgress = 0.0;
-
-    const animationDuration = 3000; // 3 secondes
-    const startTime = millis();
-
-    // Lancer les shockwaves ET l'animation shader en parallèle
-    const generateWaves = async () => {
-      const waveCount = 20;
-      for (let i = 0; i < waveCount; i++) {
-        await sleep(150);
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const size = 0.8 + Math.random() * 1.4;
-        this.generateShockwave(x, y, size);
-      }
-    };
-
-    const animateProgress = async () => {
-      while (this.appearProgress < 1.0) {
-        await sleep(16); // ~60fps
-        const elapsed = millis() - startTime;
-        this.appearProgress = Math.min(elapsed / animationDuration, 1.0);
-      }
-    };
-
-    // Exécuter en parallèle
-    await Promise.all([generateWaves(), animateProgress()]);
-
-    // Fin de l'animation
-    this.isAppearing = false;
+    console.log('Début');
+    await sleep(3000); // pause 3 secondes
+    console.log('Après 3 secondes');
   }
 
   // Séquence d'animation de grandes shockwaves avec effacement
@@ -166,8 +132,10 @@ class Shockwave {
         setTimeout(() => {
           // Activer l'effacement avec la première onde
           if (index === 0) {
+            console.log('🔥 Shockwave: Activating isErasing with wave', index);
             this.isErasing = true;
           }
+          console.log('🌊 Shockwave: Generating wave', index, 'at', point.x, point.y);
           this.generateShockwave(point.x, point.y, point.size);
         }, index * 100);
       });
@@ -177,6 +145,7 @@ class Shockwave {
         // Remettre en mode normal après un délai
         setTimeout(() => {
           this.isErasing = false;
+          console.log('🌊 Shockwave: Animation completed, resolved Promise');
           resolve();
         }, 500);
       }, 1500); // Durée de l'animation + marge

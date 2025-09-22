@@ -1,134 +1,87 @@
-/**
- * MainPage - Page principale du portfolio
- * Affiche les textes de navigation avec MysteriousText
- */
-
 class MainPage {
   constructor() {
-    this.mysteriousText = null;
-    this.isActive = false;
-    this.mainTexts = [];
-    this.debugFont = null;
+    this.mysteriousTexts = [];
+    this.setupMysteriousTexts();
+    this.isAppear = false;
   }
 
-  preload() {
-    // Charger les polices en preload (obligatoire pour WEBGL)
-    this.debugFont = loadFont('ressources/fonts/CourierPrime-Regular.ttf');
-
-    // Précharger MysteriousText avec polices runiques
-    this.mysteriousText = new MysteriousText();
-    this.mysteriousText.preload();
-  }
-
-  init() {
-
-    // Initialiser MysteriousText (déjà créé en preload)
-    this.mysteriousText.init();
-
-    // Configuration des textes principaux
-    this.setupMainTexts();
-
-    console.log('=� MainPage initialized');
-  }
-
-  setupMainTexts() {
+  setupMysteriousTexts() {
     const center = { x: width / 2, y: height / 2 };
     const lineSpacing = 80;
+    const letterSpacing = 15;
+    const textColor = { r: 80, g: 80, b: 80 };
 
-    // Configuration des textes avec leurs actions
-    const textConfigs = [
-      { text: "Curriculum vitae", yOffset: -1.5, action: "cv" },
-      { text: "Bandcamp", yOffset: -0.5, url: "https://reptilianbusinessrecords.bandcamp.com/album/snk-operator" },
-      { text: "Soundcloud", yOffset: 0.5, url: "https://soundcloud.com/meo-sound" },
-      { text: "Shaderland", yOffset: 1.5, action: "shaderland" }
+    const mainTexts = [
+      { text: "Curiculum vitae", action: () => { switchTo('cvPage'); } },
+      { text: "Bandcamp", action: () => { window.open('https://reptilianbusinessrecords.bandcamp.com/album/snk-operator', '_blank'); } },
+      { text: "Soundcloud", action: () => { window.open('https://soundcloud.com/meo-sound', '_blank'); } },
+      { text: "Shaderland", action: () => { switchTo('shaderland'); } }
     ];
 
-    // Créer les objets texte
-    this.mainTexts = textConfigs.map(config => {
-      const textObj = this.mysteriousText.createTextObj(
-        config.text,
-        center.x,
-        center.y + lineSpacing * config.yOffset,
-        15,
-        80
+    mainTexts.forEach((item, index) => {
+      const textObj = new MysteriousText(
+        item.text,
+        { x: center.x, y: center.y + lineSpacing * (index - 1.5) },
+        letterSpacing,
+        textColor
       );
-
-      // Ajouter les propriétés d'interaction
-      if (config.action) textObj.action = config.action;
-      if (config.url) textObj.url = config.url;
-
-      return textObj;
+      textObj.action = item.action;
+      this.mysteriousTexts.push(textObj);
     });
   }
 
-  show() {
-    this.isActive = true;
-    console.log('=� MainPage shown');
+  async appear() {
+    console.log('MainPage appear');
+    this.isAppear = false; // Désactiver immédiatement pour éviter les répétitions
+
+    // Démarrer l'animation d'apparition
+    await shockwave.triggerAppearingShockwave();
+    herald.addMessage("> Hello there, welcome to my page. Do not hesitate to contact me on leomacias@hotmail.fr", 3000);
   }
 
-  hide() {
-    this.isActive = false;
-    console.log('=� MainPage hidden');
+  async render() {
+    if (this.isAppear) {
+      await this.appear(); // Sans await pour ne pas bloquer le render
+    }
+    
+    for (let mysText of this.mysteriousTexts) {
+      mysText.render();
+    }
+    
   }
 
-  renderToGraphics(graphics) {
-    if (!this.isActive || !this.mysteriousText?.isInitialized) return;
-
-    // Rendu des textes sur le buffer graphics pour le shader
-    for (let textObj of this.mainTexts) {
-      this.mysteriousText.render(textObj, graphics);
+  async hide() {
+    if (shockwave) {
+      await shockwave.triggerBigShockwaveAnimation();
     }
   }
 
-  renderToCanvas(p) {
-    if (!this.isActive || !this.mysteriousText?.isInitialized) return;
-
-    // Rendu direct sur le canvas sans shader
-    for (let textObj of this.mainTexts) {
-      this.mysteriousText.render(textObj);
-    }
+  testRenderRedCircle() {
+    fill(255, 0, 0);
+    noStroke();
+    ellipse(mouseX, mouseY, 10, 10);
   }
 
-  // Méthode de compatibilité
-  update() {
-    // Cette méthode n'est plus utilisée mais gardée pour compatibilité
+  testRenderBufferGraphicsRedCircle() {
+    //this.graphics.background(244, 243, 241);
+    this.graphic.clear();
+    this.graphic.fill(255, 0, 0);
+    this.graphic.noStroke();
+    this.graphic.ellipse(mouseX, mouseY, 10, 10);
+    //translate(width/2, height/2);
+    image(this.graphic, 0, 0);
   }
 
   onMousePressed() {
-    if (!this.isActive) return;
-
-    // V�rifier les clics sur les textes
-    for (let textObj of this.mainTexts) {
-      if (this.mysteriousText.isHoveringText(textObj)) {
-        this.handleTextClick(textObj);
-        break;
+    for (let mysteriousMainText of this.mysteriousTexts) {
+      if (mysteriousMainText.isHoveringText()) {
+        if (mysteriousMainText.action) {
+          mysteriousMainText.action();
+          break;
+        }
       }
     }
   }
 
-  handleTextClick(textObj) {
-    // Déclencher animation shockwave
-    const shockwave = window.getShockwave();
-    if (shockwave?.isInitialized) {
-      shockwave.triggerBigShockwaveAnimation();
-    }
 
-    if (textObj.action === "cv") {
-      console.log('🔗 Navigate to CV');
-      window.switchTo('cvPage');
-    } else if (textObj.action === "shaderland") {
-      console.log('<� Navigate to Shaderland');
-      if (shockwave?.isInitialized) {
-        shockwave.triggerBigShockwaveAnimation();
-        setTimeout(() => {
-          window.switchTo('shaderland');
-        }, 1000);
-      } else {
-        window.switchTo('shaderland');
-      }
-    } else if (textObj.url) {
-      console.log('= Opening URL:', textObj.url);
-      window.open(textObj.url, '_blank');
-    }
-  }
 }
