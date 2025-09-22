@@ -27,8 +27,8 @@ function setup() {
 
 function draw() {
   translate(-width/2, -height/2);
-  background(244, 243, 241);
-  clear();
+  //background(244, 243, 241);
+  //clear();
   graphic.background(244, 243, 241);
   herald.update();
   herald.render();
