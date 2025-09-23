@@ -1,11 +1,9 @@
 class Shockwave {
   constructor() {
     this.shader = loadShader('ressources/shaders/vert/main-v3.vert', 'ressources/shaders/frag/shock.frag');
+    
+    this.isAppear = false;
     this.isErasing = false;
-
-    // Mode apparition
-    this.isAppearing = false;
-    this.appearProgress = 0.0;
 
     // Configuration shockwave
     this.NUM_SHOCKWAVES = 10;
@@ -53,16 +51,17 @@ class Shockwave {
     this.shader.setUniform("times", timesUniform);
     this.shader.setUniform("sizes", sizesUniform);
     this.shader.setUniform("image", graphic);
+    this.shader.setUniform("backgroundImage", backgroundGraphic);
     this.shader.setUniform("aspect", [1, width/height]);
     
     // Uniforms pour l'apparition
-    let appearingValue = this.isAppearing ? 1.0 : 0.0;
-    this.shader.setUniform("isAppearing", appearingValue);
-    this.shader.setUniform("appearProgress", this.appearProgress);
+    let appearingValue = this.isAppear ? 1.0 : 0.0;
+    this.shader.setUniform("isAppear", appearingValue);
     
     // Uniforms pour l'effacement
     let erasingValue = this.isErasing ? 1.0 : 0.0;
     this.shader.setUniform("isErasing", erasingValue);
+    
     rect(-width/2, -height/2, width, height);
 
   }
@@ -114,79 +113,39 @@ class Shockwave {
     this.previousMouseY = mouseY;
   }
 
-  async triggerAppearingShockwave() {
-    // Activer le mode apparition
-    this.isAppearing = true;
-    this.appearProgress = 0.0;
+  async apparitionMainPage() {
+    this.isAppear = true;
+    let delay = 90;
+    let apparitionDuration = 3000;
 
-    const animationDuration = 3000; // 3 secondes
-    const startTime = millis();
-
-    // Lancer les shockwaves ET l'animation shader en parallèle
-    const generateWaves = async () => {
-      const waveCount = 20;
-      for (let i = 0; i < waveCount; i++) {
-        await sleep(150);
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const size = 0.8 + Math.random() * 1.4;
-        this.generateShockwave(x, y, size);
-      }
-    };
-
-    const animateProgress = async () => {
-      while (this.appearProgress < 1.0) {
-        await sleep(16); // ~60fps
-        const elapsed = millis() - startTime;
-        this.appearProgress = Math.min(elapsed / animationDuration, 1.0);
-      }
-    };
-
-    // Exécuter en parallèle
-    await Promise.all([generateWaves(), animateProgress()]);
-
-    // Fin de l'animation
-    this.isAppearing = false;
+    for (let t = 0; t < apparitionDuration; t += delay) {
+      // Génère des positions centrées (écart-type ajustable)
+      let stddev = 0.06; // Plus petit = plus concentré au centre
+      let x = width / 2 + this.gaussianRandom() * width * stddev;
+      let y = height / 2 + this.gaussianRandom() * height * stddev;
+      let size = 0.6 + Math.random() * 0.5;
+      this.generateShockwave(x, y, size);
+      await sleep(delay);
+      let appearingTime = this.smoothstep(0, apparitionDuration, t);
+      //console.log(appearingTime);
+      this.shader.setUniform("appearingTime", appearingTime);
+    }
+    this.isAppear = false;
   }
 
-  // Séquence d'animation de grandes shockwaves avec effacement
-  async triggerBigShockwaveAnimation() {
-    return new Promise((resolve) => {
-      // Pattern horizontal pour effacement fluide de gauche à droite
-      const shockwavePoints = [
-        { x: width * 0.0, y: height * 0.0, size: 2.5 },
-        { x: width * 0.0, y: height * 0.1, size: 2.5 },
-        { x: width * 0.0, y: height * 0.3, size: 2.5 },
-        { x: width * 0.0, y: height * 0.4, size: 2.2 },
-        { x: width * 0.0, y: height * 0.5, size: 2.2 },
-        { x: width * 0.0, y: height * 0.8, size: 100.2 },
-      ];
-
-      shockwavePoints.forEach((point, index) => {
-        setTimeout(() => {
-          // Activer l'effacement avec la première onde
-          if (index === 0) {
-            this.isErasing = true;
-          }
-          this.generateShockwave(point.x, point.y, point.size);
-        }, index * 100);
-      });
-
-      // Attendre la fin de l'animation
-      setTimeout(() => {
-        // Remettre en mode normal après un délai
-        setTimeout(() => {
-          this.isErasing = false;
-          resolve();
-        }, 500);
-      }, 1500); // Durée de l'animation + marge
-    });
-  }
 
     // Fonction utilitaire smoothstep
   smoothstep(edge0, edge1, x) {
     let t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
     return t * t * (3 - 2 * t);
+  }
+
+  gaussianRandom() {
+    // Box-Muller transform, moyenne 0, écart-type 1
+    let u = 0, v = 0;
+    while(u === 0) u = Math.random();
+    while(v === 0) v = Math.random();
+    return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
   }
 
 }

@@ -3,6 +3,8 @@ let herald = null;
 let activePage = null;
 let pages = new Map();
 let graphic = null;
+let backgroundGraphic = null;
+
 function preload() {
   shockwave = new Shockwave();
 }
@@ -12,9 +14,11 @@ function setup() {
   canvas.parent('p5-container');
   background(244, 243, 241);
   graphic = createGraphics(width, height);
-  graphic.textAlign(graphic.CENTER, graphic.CENTER);
   graphic.fill(80, 80, 80);
   graphic.noStroke();
+
+  backgroundGraphic = createGraphics(width, height);
+  backgroundGraphic.background(244, 243, 241);
 
   // Position Herald en bas à gauche, en tenant compte de la translation WEBGL
   herald = new Herald(50, height - 50);
@@ -30,7 +34,6 @@ function draw() {
   //background(244, 243, 241);
   //clear();
   graphic.background(244, 243, 241);
-  herald.update();
   herald.render();
   activePage.render();
   shockwave.render();
@@ -55,8 +58,7 @@ function switchTo(pageName) {
   }
   activePage = pages.get(pageName);
   if (activePage) {
-    console.log('Appear new page:', pageName);
-    activePage.isAppear = true;
+    activePage.appear();
   } else {
     console.log('[ERROR] Page not found:', pageName);
   }

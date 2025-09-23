@@ -32,18 +32,17 @@ class MainPage {
 
   async appear() {
     console.log('MainPage appear');
-    this.isAppear = false; // Désactiver immédiatement pour éviter les répétitions
-
     // Démarrer l'animation d'apparition
-    await shockwave.triggerAppearingShockwave();
-    herald.addMessage("> Hello there, welcome to my page. Do not hesitate to contact me on leomacias@hotmail.fr", 3000);
+    //this.isAppear = false;
+    //await sleep(1000);
+    
+    await shockwave.apparitionMainPage();
+    await sleep(1000);
+    herald.addMessage("> Hello there", 3000);
+    herald.addMessage("> Move the mouse", 10000);
   }
 
-  async render() {
-    if (this.isAppear) {
-      await this.appear(); // Sans await pour ne pas bloquer le render
-    }
-    
+  render() {
     for (let mysText of this.mysteriousTexts) {
       mysText.render();
     }
@@ -51,9 +50,7 @@ class MainPage {
   }
 
   async hide() {
-    if (shockwave) {
-      await shockwave.triggerBigShockwaveAnimation();
-    }
+    console.log('MainPage hide');
   }
 
   testRenderRedCircle() {

@@ -33,7 +33,7 @@ class Herald {
 
   // Ajouter un message à la queue
   addMessage(text, minDisplayTime = 1000) {
-    console.log("Herald addMessage:", text + " (minDisplayTime:", minDisplayTime, ")");
+    //console.log("Herald addMessage:", text + " (minDisplayTime:", minDisplayTime, ")");
     const message = {
       text: text,
       minDisplayTime: minDisplayTime
@@ -140,12 +140,14 @@ class Herald {
 
   // Rendu du texte (� appeler apr�s update)
   render() {
+
+    this.update();
     if (!this.currentMessage) {
-      console.log("Herald render: no current message");
+      //console.log("Herald render: no current message");
       return;
     }
 
-    console.log("Herald render: displaying", this.displayedText, "at", this.pos.x, this.pos.y);
+    //console.log("Herald render: displaying", this.displayedText, "at", this.pos.x, this.pos.y);
 
 
     // Configuration du style
