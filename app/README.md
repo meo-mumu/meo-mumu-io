@@ -8,7 +8,6 @@ Ce portfolio implémente une **Single Page Application (SPA)** avec un système 
 
 ### Comment lire ce document
 - Quand il y a des "?" c'est que je ne sais pas encore
-- J'attend une completion de l'IA lorsqu'il y a des "[...]"
 
 ### Concepts clés
 - **Instance p5.js unique** partagée entre tous les **pages** et **ressources**
@@ -54,11 +53,9 @@ Shader d'onde de choc qui se déclanche selon un evenement.
 
 ## Developpement
 
-- ES6
 - Classes et Interfaces et Heritances
 - Design Patterns 
 - Render Optimisation
-- Lazy Loading
 - Component-based Architecture
 - Micro-optimisations
 - Micro-frontend
