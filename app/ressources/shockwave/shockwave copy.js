@@ -3,13 +3,10 @@ class Shockwave {
     this.shader = loadShader('ressources/shaders/vert/main-v3.vert', 'ressources/shaders/frag/shock.frag');
     
     this.isAppear = false;
-    this.isHidding = false;
+    this.isErasing = false;
 
     this.apparitionDuration = 2000; // Durée totale de l'apparition en ms
     this.apparitionTime = 0; // Temps écoulé depuis le début de l'apparition
-
-    this.hideDuration = 2000; // Durée totale de la disparition en ms
-    this.hideTime = 0; // Temps écoulé depuis le début de la disparition
 
     // Configuration shockwave
     this.NUM_SHOCKWAVES = 10;
@@ -60,15 +57,14 @@ class Shockwave {
     this.shader.setUniform("backgroundImage", backgroundGraphic);
     this.shader.setUniform("aspect", [1, width/height]);
     this.shader.setUniform("apparitionTime", this.apparitionTime);
-    this.shader.setUniform("hideTime", this.hideTime);
-
+    
     // Uniforms pour l'apparition
     let appearingValue = this.isAppear ? 1.0 : 0.0;
     this.shader.setUniform("isAppear", appearingValue);
-
+    
     // Uniforms pour l'effacement
-    let hiddingValue = this.isHidding ? 1.0 : 0.0;
-    this.shader.setUniform("isHidding", hiddingValue);
+    let erasingValue = this.isErasing ? 1.0 : 0.0;
+    this.shader.setUniform("isErasing", erasingValue);
     
     rect(-width/2, -height/2, width, height);
 
@@ -139,26 +135,12 @@ class Shockwave {
 
     this.isAppear = false;
     this.apparitionTime = 1.0;
-    console.log('Appear effect done');
+    console.log('Appear effect done ' + this.isAppear);
   }
 
   async hideEffect() {
-    this.isHidding = true;
-    this.hideTime = 0;
-    const start = performance.now();
-    const spiralPromise = this.triggerSomeSpirals();
-
-    while (this.hideTime < 1.0) {
-      const now = performance.now();
-      const elapsed = now - start;
-      this.hideTime = Math.min(elapsed / this.hideDuration, 1.0);
-      await new Promise(requestAnimationFrame);
-    }
-    await spiralPromise;
-
-    this.isHidding = false;
-    this.hideTime = 1.0;
-    console.log('Hide effect done');
+    await sleep(1000);
+    console.log('test hide effect');
   }
 
   async triggerSomeSpirals() {
