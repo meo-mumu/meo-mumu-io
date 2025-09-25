@@ -2,7 +2,6 @@ class MainPage {
   constructor() {
     this.mysteriousTexts = [];
     this.setupMysteriousTexts();
-    this.isAppear = false;
   }
 
   setupMysteriousTexts() {
@@ -32,41 +31,19 @@ class MainPage {
 
   async appear() {
     console.log('MainPage appear');
-    // Démarrer l'animation d'apparition
-    //this.isAppear = false;
-    //await sleep(1000);
-    
-    await shockwave.apparitionMainPage();
-    await sleep(1000);
+    shockwave.appearEffect();
+    await sleep(5000);
     herald.addMessage("> Hello there", 3000);
-    herald.addMessage("> Move the mouse", 10000);
-  }
-
-  render() {
-    for (let mysText of this.mysteriousTexts) {
-      mysText.render();
-    }
-    
+    herald.addMessage("> Try Moving the mouse", 10000);
   }
 
   async hide() {
     console.log('MainPage hide');
+    shockwave.hideEffect();
   }
 
-  testRenderRedCircle() {
-    fill(255, 0, 0);
-    noStroke();
-    ellipse(mouseX, mouseY, 10, 10);
-  }
-
-  testRenderBufferGraphicsRedCircle() {
-    //this.graphics.background(244, 243, 241);
-    this.graphic.clear();
-    this.graphic.fill(255, 0, 0);
-    this.graphic.noStroke();
-    this.graphic.ellipse(mouseX, mouseY, 10, 10);
-    //translate(width/2, height/2);
-    image(this.graphic, 0, 0);
+  render() {
+    for (let mysText of this.mysteriousTexts) { mysText.render();}
   }
 
   onMousePressed() {

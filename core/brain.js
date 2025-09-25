@@ -20,24 +20,27 @@ function setup() {
   backgroundGraphic = createGraphics(width, height);
   backgroundGraphic.background(244, 243, 241);
 
-  // Position Herald en bas à gauche, en tenant compte de la translation WEBGL
+  // Position Herald en bas à gauche
   herald = new Herald(50, height - 50);
 
+  // Initialiser objects pages
   pages.set('mainPage', new MainPage());
-  // pages.set('cvPage', new CVPage());
+  pages.set('cvPage', new CvPage());
   // pages.set('shaderland', new ShaderLand());
-  switchTo('mainPage');
+
+  // Démarrer sur mainPage
+  activePage = pages.get('mainPage');
+  activePage.appear();
 }
 
 function draw() {
   translate(-width/2, -height/2);
-  //background(244, 243, 241);
-  //clear();
+  background(244, 243, 241);
+  clear();
   graphic.background(244, 243, 241);
   herald.render();
   activePage.render();
   shockwave.render();
-
 }
 
 function windowResized() {
@@ -50,18 +53,10 @@ function mousePressed() {
   }
 }
 
-function switchTo(pageName) {
-  if (activePage) {
-    console.log('Hiding current page:', pageName);
-    // Temporairement désactivé pour éviter conflit avec animation d'apparition
-    // activePage.hide();
-  }
-  activePage = pages.get(pageName);
-  if (activePage) {
-    activePage.appear();
-  } else {
-    console.log('[ERROR] Page not found:', pageName);
-  }
+async function switchTo(pageName) {
+  activePage.hide(); // fade graphic -> bg
+  //activePage = pages.get(pageName);
+  //activePage.appear(); // fade bg -> graphic
 }
 
 function sleep(millisecondsDuration)

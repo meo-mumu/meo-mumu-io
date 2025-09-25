@@ -17,7 +17,7 @@ uniform float[NUM_SHOCKWAVES] sizes;
 
 uniform float isErasing;
 uniform float isAppear;
-uniform float appearingTime; // <-- Ajout
+uniform float apparitionTime;
 
 const float maxRadius = 0.5;
 
@@ -84,14 +84,15 @@ void main() {
     vec3 bgColor = texture(backgroundImage, correctedPos).rgb;
     vec3 revealedColor = mix(bgColor, waveColor, revealMask);
 
-    // --- Apparition centrale contrôlée par appearingTime ---
+    // --- Apparition centrale contrôlée par apparitionTime ---
     float centerFade = 0.0;
     if (isAppear > 0.5) {
-        // utilse appearingTime pour un fondu progressif
-        vec3 finalColor = mix(bgColor, waveColor, pow(appearingTime, 2.0));
+        // Fade progressif du texte pur sur le fond
+        vec3 fadedText = mix(bgColor, fgColor, pow(apparitionTime, 2.0));
+        // Puis onde par-dessus le texte fade
+        vec3 finalColor = mix(fadedText, vec3(0.15, 0.15, 0.18), clamp(abs(shading), 0.0, 1.0));
         colour = vec4(finalColor, 1.0);
     } else {
-        // Après apparition, texte partout, onde visible si présente
         colour = vec4(waveColor, 1.0);
     }
 }
