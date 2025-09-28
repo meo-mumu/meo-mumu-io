@@ -5,7 +5,23 @@ let pages = new Map();
 let graphic = null;
 let backgroundGraphic = null;
 
+// Système global de fonts
+let fonts = {};
+
 function preload() {
+  // Preload des fonts
+  fonts.courier = loadFont('ressources/fonts/CourierPrime-Regular.ttf');
+  fonts.segoeUI = loadFont('ressources/fonts/segoe-ui-this/segoeuithis.ttf');
+  fonts.segoeUIBold = loadFont('ressources/fonts/segoe-ui-this/segoeuithibd.ttf');
+  fonts.segoeUIItalic = loadFont('ressources/fonts/segoe-ui-this/segoeuithisi.ttf');
+  fonts.darune = loadFont('ressources/fonts/rune/DARUNE.otf');
+  fonts.glagolitsa = loadFont('ressources/fonts/rune/Glagolitsa.ttf');
+  fonts.ancientModern = loadFont('ressources/fonts/rune/Ancient_G_Modern.ttf');
+  fonts.highschoolRunes = loadFont('ressources/fonts/rune/Highschool_Runes.ttf');
+  fonts.ninjargon = loadFont('ressources/fonts/rune/Ninjargon-Regular.otf');
+  fonts.nyctographic = loadFont('ressources/fonts/rune/Nyctographic.otf');
+  fonts.graceOfEtro = loadFont('ressources/fonts/rune/grace_of_etro.ttf');
+
   shockwave = new Shockwave();
 }
 
@@ -25,7 +41,7 @@ function setup() {
 
   // Initialiser objects pages
   pages.set('mainPage', new MainPage());
-  pages.set('cvPage', new CvPage());
+  pages.set('cvPage', new CvPageP5());
   // pages.set('shaderland', new ShaderLand());
 
   // Démarrer sur mainPage
@@ -38,8 +54,8 @@ function draw() {
   background(244, 243, 241);
   clear();
   graphic.background(244, 243, 241);
-  herald.render();
   activePage.render();
+  herald.render();
   shockwave.render();
 }
 
@@ -53,10 +69,28 @@ function mousePressed() {
   }
 }
 
+function mouseWheel(event) {
+  if (activePage && activePage.onMouseWheel) {
+    return activePage.onMouseWheel(event);
+  }
+}
+
+function mouseReleased() {
+  if (activePage && activePage.onMouseReleased) {
+    activePage.onMouseReleased();
+  }
+}
+
+function mouseDragged() {
+  if (activePage && activePage.onMouseDragged) {
+    activePage.onMouseDragged();
+  }
+}
+
 async function switchTo(pageName) {
   activePage.hide(); // fade graphic -> bg
-  //activePage = pages.get(pageName);
-  //activePage.appear(); // fade bg -> graphic
+  activePage = pages.get(pageName);
+  activePage.appear(); // fade bg -> graphic
 }
 
 function sleep(millisecondsDuration)

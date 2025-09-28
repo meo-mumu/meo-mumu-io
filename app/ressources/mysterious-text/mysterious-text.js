@@ -1,39 +1,39 @@
 class MysteriousText {
-  constructor(text, pos, spacing, color) {
+  constructor(text, pos, spacing, color, size = 25) {
     this.text = text;
     this.pos = pos;
     this.spacing = spacing;
     this.color = color;
+    this.size = size;
     this.sensitivities = Array.from({length: text.length}, () => (Math.random() - 0.5) * 0.4);
     this.hoverStartTime = 0;
     this.isHovered = false;
     this.underlineProgress = 0;
-    this.mysteriousFonts = null;
-    this.preloadFont();
+    this.initMysteriousFonts();
   }
 
- 
-  preloadFont() {
-    // Charger toutes les polices en preload
+  initMysteriousFonts() {
+    // Utiliser les fonts du système global avec sizeScale
+    // Courier est la référence (scale 1.0), les autres s'ajustent proportionnellement
     this.mysteriousFonts = [
       {
-        font: loadFont('ressources/fonts/CourierPrime-Regular.ttf'),
-        size: 25,
+        font: fonts.courier,
+        sizeScale: 1.0,
         threshold: 0.8
       },
       {
-        font: loadFont('ressources/fonts/rune/Highschool_Runes.ttf'),
-        size: 35,
+        font: fonts.highschoolRunes,
+        sizeScale: 1.4, // 35/25 = 1.4
         threshold: 0.88
       },
       {
-        font: loadFont('ressources/fonts/rune/grace_of_etro.ttf'),
-        size: 35,
+        font: fonts.graceOfEtro,
+        sizeScale: 1.4, // 35/25 = 1.4
         threshold: 0.95
       },
       {
-        font: loadFont('ressources/fonts/rune/Ancient_G_Modern.ttf'),
-        size: 35,
+        font: fonts.ancientModern,
+        sizeScale: 1.4, // 35/25 = 1.4
         threshold: 1.0
       }
     ];
@@ -104,7 +104,7 @@ class MysteriousText {
       const fontIndex = this.getFontIndex(t);
 
       graphic.textFont(this.mysteriousFonts[fontIndex].font);
-      graphic.textSize(this.mysteriousFonts[fontIndex].size);
+      graphic.textSize(this.size * this.mysteriousFonts[fontIndex].sizeScale);
       graphic.fill(this.color.r, this.color.g, this.color.b);
       graphic.text(this.text[i], letterX, letterY);
     }

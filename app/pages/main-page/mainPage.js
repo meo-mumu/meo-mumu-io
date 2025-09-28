@@ -22,7 +22,8 @@ class MainPage {
         item.text,
         { x: center.x, y: center.y + lineSpacing * (index - 1.5) },
         letterSpacing,
-        textColor
+        textColor,
+        25 // size de base
       );
       textObj.action = item.action;
       this.mysteriousTexts.push(textObj);

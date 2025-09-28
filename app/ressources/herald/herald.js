@@ -10,7 +10,7 @@ class Herald {
 
     // Animation de frappe
     this.currentCharIndex = 0;
-    this.typingSpeed = 15; 
+    this.typingSpeed = 15;
     this.nextCharTime = 0;
     this.displayedText = "";
 
@@ -19,16 +19,8 @@ class Herald {
     this.minDisplayTime = 0;
 
     // Style
-    this.font = null;
     this.textSize = 16;
     this.textColor = { r: 80, g: 80, b: 80 };
-
-    this.loadFont();
-  }
-
-  loadFont() {
-    // Charger une police pour le Herald
-    this.font = loadFont('ressources/fonts/CourierPrime-Regular.ttf');
   }
 
   // Ajouter un message à la queue
@@ -151,8 +143,8 @@ class Herald {
 
 
     // Configuration du style
-    if (this.font) {
-      graphic.textFont(this.font);
+    if (fonts.courier) {
+      graphic.textFont(fonts.courier);
     }
     graphic.textSize(this.textSize);
     graphic.fill(this.textColor.r, this.textColor.g, this.textColor.b);
