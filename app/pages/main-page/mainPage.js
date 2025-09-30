@@ -32,7 +32,7 @@ class MainPage {
 
   async appear() {
     console.log('MainPage appear');
-    shockwave.appearEffect();
+    shockwave.appearEffect(type = "central-bubbling");
     await sleep(5000);
     herald.addMessage("> Hello there", 3000);
     herald.addMessage("> Try Moving the mouse", 10000);

@@ -123,11 +123,17 @@ class Shockwave {
 
   // ------------------------------------------------------------------------------------- Effects spirals
 
-  async appearEffect() {
+  async appearEffect(type = "central-bubbling") {
     this.isAppear = true;
     this.apparitionTime = 0;
     const start = performance.now();
-    const spiralPromise = this.trigger4CenterSpirals();
+    let spiralPromise;
+
+    if (type === "central-bubbling") {
+      spiralPromise = this.triggerCentralSpirals();
+    } else if (type === "extended-bubbling") {
+      spiralPromise = this.triggerExtendedSpirals();
+    }
 
     while (this.apparitionTime < 1.0) {
       const now = performance.now();
@@ -145,23 +151,20 @@ class Shockwave {
   async hideEffect() {
     this.isHidding = true;
     this.hideTime = 0;
+    // juste await sleep 1000. mais il faut animer le hideTime
     const start = performance.now();
-    const spiralPromise = this.trigger4ExtendedSpirals();
-
     while (this.hideTime < 1.0) {
       const now = performance.now();
       const elapsed = now - start;
       this.hideTime = Math.min(elapsed / this.hideDuration, 1.0);
       await new Promise(requestAnimationFrame);
     }
-    await spiralPromise;
-
     this.isHidding = false;
     this.hideTime = 1.0;
     console.log('Hide effect done');
   }
 
-  async trigger4CenterSpirals() {
+  async triggerCentralSpirals() {
     let options = null;
     // spiral from center  0
     options = {pointsPerTurn: 3, minRadius: 0.05, maxRadius: Math.sqrt(2) / 16, delay: 80, reverse: false, angleOffset: 0};
@@ -177,7 +180,7 @@ class Shockwave {
     this.launchOneSpiral(options);
   }
 
-  async trigger4ExtendedSpirals() {
+  async triggerExtendedSpirals() {
     let options = null;
     // spiral from center  0
     options = {pointsPerTurn: 3, minRadius: 0.05, maxRadius: Math.sqrt(2) / 2, delay: 80, reverse: false, angleOffset: 0};

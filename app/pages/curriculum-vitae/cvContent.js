@@ -114,7 +114,14 @@ const CV_THEME = {
     accentBackground: [220, 239, 220, 31],
     textPrimary: [34, 34, 34],
     textSecondary: [68, 68, 68],
-    textMedium: [51, 51, 51]
+    textMedium: [51, 51, 51],
+    neomorphic: {
+      background: [244, 243, 241],          // Couleur de base (même que le background global)
+      lightShadow: [255, 255, 255, 1.0],    // Ombre claire très marquée
+      darkShadow: [180, 180, 180, 1.0],     // Ombre foncée très marquée
+      surfaceHighlight: [248, 247, 245],    // Léger highlight pour la surface
+      surfaceDepth: [240, 239, 237]         // Léger assombrissement pour la profondeur
+    }
   },
 
   dimensions: {

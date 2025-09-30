@@ -55,7 +55,7 @@ function draw() {
   clear();
   graphic.background(244, 243, 241);
   activePage.render();
-  herald.render();
+  //herald.render();
   shockwave.render();
 }
 
