@@ -127,7 +127,7 @@ class CvPageP5 {
   }
 
   calculateLayout() {
-    const containerWidth = min(width * 0.9, 1200);
+    const containerWidth = min(width * 0.95, 1400);
     const containerX = (width - containerWidth) / 2;
     const containerY = 50;
     const containerHeight = height - 2 * containerY;
@@ -394,7 +394,7 @@ class CvPageP5 {
 
       // Category - use Courier font
       if (fonts.courier) graphic.textFont(fonts.courier);
-      graphic.textSize(12);
+      graphic.textSize(14);
       graphic.textAlign(graphic.LEFT, graphic.TOP);
       this.applyColor(this.theme.colors.textSecondary);
       graphic.text(skillGroup.category.toUpperCase(), x, y);
@@ -406,7 +406,7 @@ class CvPageP5 {
 
       for (const skill of skillGroup.items) {
         // Calculate exact text width with consistent font size
-        this.setTextStyle(12, this.theme.colors.textMedium);
+        this.setTextStyle(14, this.theme.colors.textMedium);
         const textWidth = graphic.textWidth(skill);
         const padding = 16; // Reduced padding for better proportions
         const tagWidth = textWidth + padding;
@@ -427,7 +427,7 @@ class CvPageP5 {
         // Tag text - perfectly centered
         graphic.textAlign(graphic.LEFT, graphic.CENTER); // CENTER for vertical alignment
         this.applyColor(this.theme.colors.textMedium);
-        graphic.textSize(12);
+        graphic.textSize(14);
         this.applyFont();
         const textX = tagX + (tagWidth - textWidth) / 2; // Perfect horizontal centering
         const textY = tagY + tagHeight/2 - 1; // Slightly higher
@@ -447,7 +447,7 @@ class CvPageP5 {
 
       // Category - use Courier font
       if (fonts.courier) graphic.textFont(fonts.courier);
-      graphic.textSize(12);
+      graphic.textSize(14);
       graphic.textAlign(graphic.LEFT, graphic.TOP);
       this.applyColor(this.theme.colors.textSecondary);
       graphic.text(interestGroup.category.toUpperCase(), x, y);
@@ -458,7 +458,7 @@ class CvPageP5 {
 
       for (const interest of interestGroup.items) {
         // Calculate exact text width with consistent font size
-        this.setTextStyle(12, this.theme.colors.textMedium);
+        this.setTextStyle(14, this.theme.colors.textMedium);
         const textWidth = graphic.textWidth(interest);
         const padding = 16; // Reduced padding for better proportions
         const tagWidth = textWidth + padding;
@@ -479,7 +479,7 @@ class CvPageP5 {
         // Tag text - perfectly centered
         graphic.textAlign(graphic.LEFT, graphic.CENTER); // CENTER for vertical alignment
         this.applyColor(this.theme.colors.textMedium);
-        graphic.textSize(12);
+        graphic.textSize(14);
         this.applyFont();
         const textX = tagX + (tagWidth - textWidth) / 2; // Perfect horizontal centering
         const textY = tagY + tagHeight/2 - 1; // Slightly higher
@@ -540,7 +540,8 @@ class CvPageP5 {
     const buttonX = x + width - buttonWidth - 20;
     const buttonY = y + height - buttonHeight - 15; // Bottom right position
 
-    // Store bounds for interaction
+    // Store bounds for interaction (ajustés pour le système WEBGL)
+    // Les coordonnées de rendu sont déjà dans le bon système après translate()
     this.ui.exportButtonBounds = {
       x: buttonX, y: buttonY,
       width: buttonWidth, height: buttonHeight
@@ -881,9 +882,17 @@ class CvPageP5 {
 
   onMousePressed() {
     // Check export button click
-    if (this.isMouseOnExportButton()) {
-      this.exportToPDF();
-      return;
+    if (this.ui.exportButtonBounds) {
+      const bounds = this.ui.exportButtonBounds;
+      const isInside = mouseX >= bounds.x &&
+             mouseX <= bounds.x + bounds.width &&
+             mouseY >= bounds.y &&
+             mouseY <= bounds.y + bounds.height;
+
+      if (isInside) {
+        this.exportToPDF();
+        return;
+      }
     }
 
     // Check scrollbar interaction
@@ -916,32 +925,29 @@ class CvPageP5 {
 
   isMouseOnScrollbar() {
     const bounds = this.ui.scrollbarBounds;
-    return mouseX >= bounds.trackX &&
-           mouseX <= bounds.trackX + bounds.trackWidth &&
-           mouseY >= bounds.trackY &&
-           mouseY <= bounds.trackY + bounds.trackHeight;
+    const adjustedMouseX = mouseX - width/2;
+    const adjustedMouseY = mouseY - height/2;
+    return adjustedMouseX >= bounds.trackX &&
+           adjustedMouseX <= bounds.trackX + bounds.trackWidth &&
+           adjustedMouseY >= bounds.trackY &&
+           adjustedMouseY <= bounds.trackY + bounds.trackHeight;
   }
 
   isMouseOnThumb() {
     const bounds = this.ui.scrollbarBounds;
-    return mouseX >= bounds.thumbX &&
-           mouseX <= bounds.thumbX + bounds.thumbSize &&
-           mouseY >= bounds.thumbY &&
-           mouseY <= bounds.thumbY + bounds.thumbSize;
+    const adjustedMouseX = mouseX - width/2;
+    const adjustedMouseY = mouseY - height/2;
+    return adjustedMouseX >= bounds.thumbX &&
+           adjustedMouseX <= bounds.thumbX + bounds.thumbSize &&
+           adjustedMouseY >= bounds.thumbY &&
+           adjustedMouseY <= bounds.thumbY + bounds.thumbSize;
   }
 
-  isMouseOnExportButton() {
-    if (!this.ui.exportButtonBounds) return false;
-    const bounds = this.ui.exportButtonBounds;
-    return mouseX >= bounds.x &&
-           mouseX <= bounds.x + bounds.width &&
-           mouseY >= bounds.y &&
-           mouseY <= bounds.y + bounds.height;
-  }
 
   jumpToMousePosition() {
     const bounds = this.ui.scrollbarBounds;
-    const relativeY = mouseY - bounds.trackY;
+    const adjustedMouseY = mouseY - height/2;
+    const relativeY = adjustedMouseY - bounds.trackY;
     const trackProgress = constrain(relativeY / bounds.trackHeight, 0, 1);
     this.scrollState.target = trackProgress * this.scrollState.max;
   }
@@ -986,56 +992,88 @@ class CvPageP5 {
   exportToPDF() {
     console.log("Export PDF démarré...");
 
-    // Créer un graphics pour le rendu (format A4 optimisé)
-    let pdfGraphics = createGraphics(794, 1123); // A4 en pixels à 96 DPI
+    // Vérifier si jsPDF est disponible
+    if (typeof window.jspdf === 'undefined') {
+      console.error("jsPDF n'est pas chargé!");
+      alert("Erreur: jsPDF n'est pas disponible. Vérifiez que la librairie est bien chargée.");
+      return;
+    }
+
+    // Créer un graphics haute résolution pour le PDF (A4 à 300 DPI)
+    const pdfWidth = 2480;  // A4 width à 300 DPI (8.27" * 300)
+    const pdfHeight = 3508; // A4 height à 300 DPI (11.69" * 300)
+    const pdfGraphics = createGraphics(pdfWidth, pdfHeight);
+
+    // Configurer le graphics PDF directement sans toucher au global
     pdfGraphics.background(255, 255, 255);
 
-    // Calculer les marges et dimensions pour le contenu
-    let margin = 60;
-    let contentWidth = 794 - 2 * margin;
-    let contentX = margin;
-    let y = margin;
+    // Calculer l'échelle par rapport à l'affichage actuel
+    const currentLayout = this.calculateLayout();
+    const scaleX = (pdfWidth * 0.9) / currentLayout.container.width; // 90% de la largeur PDF
+    const scaleY = scaleX; // Garder les proportions
 
-    // Rendre le contenu du CV directement sur le graphics
-    y = this.drawHeaderPDF(pdfGraphics, contentX, y, contentWidth);
-    y += 40;
+    // Appliquer l'échelle sur le graphics PDF
+    pdfGraphics.push();
+    pdfGraphics.scale(scaleX, scaleY);
+
+    // Calculer les dimensions mises à l'échelle
+    const scaledMargin = 50 / scaleX;
+    const scaledContentWidth = (pdfWidth * 0.9) / scaleX;
+    const scaledContentX = ((pdfWidth - (pdfWidth * 0.9)) / 2) / scaleX;
+
+    // Temporairement utiliser le graphics PDF pour le rendu
+    const originalGraphic = graphic;
+    graphic = pdfGraphics;
+
+    // Rendu du contenu
+    const sectionSpacing = this.theme.dimensions.sectionSpacing;
+    const headerSpacing = sectionSpacing * 1.5;
+    let currentY = scaledMargin;
+
+    // Header
+    currentY = this.renderHeader(scaledContentX, currentY, scaledContentWidth);
+    currentY += headerSpacing;
 
     // Expériences
-    y = this.drawSectionPDF(pdfGraphics, "Expérience professionnelle", contentX, y, contentWidth);
-    y += 20;
-    for (let exp of this.cvData.experiences) {
-      y = this.drawExperiencePDF(pdfGraphics, exp, contentX, y, contentWidth);
-      y += 25;
+    currentY = this.renderSectionTitle("Expérience professionnelle", scaledContentX, currentY, scaledContentWidth);
+    currentY += 20;
+    for (const experience of this.content.experiences) {
+      currentY = this.renderExperienceItem(experience, scaledContentX, currentY, scaledContentWidth);
+      currentY += 20;
     }
-    y += 20;
+    currentY += sectionSpacing;
 
     // Compétences
-    y = this.drawSectionPDF(pdfGraphics, "Compétences", contentX, y, contentWidth);
-    y += 20;
-    y = this.drawSkillsPDF(pdfGraphics, contentX, y, contentWidth);
-    y += 30;
+    currentY = this.renderSectionTitle("Compétences", scaledContentX, currentY, scaledContentWidth);
+    currentY += 20;
+    currentY = this.renderSkillsGrid(scaledContentX, currentY, scaledContentWidth);
+    currentY += sectionSpacing;
 
     // Formation
-    y = this.drawSectionPDF(pdfGraphics, "Formation", contentX, y, contentWidth);
-    y += 20;
-    for (let formation of this.cvData.formation) {
-      y = this.drawFormationPDF(pdfGraphics, formation, contentX, y, contentWidth);
-      y += 20;
+    currentY = this.renderSectionTitle("Formation", scaledContentX, currentY, scaledContentWidth);
+    currentY += 20;
+    for (const education of this.content.education) {
+      currentY = this.renderEducationItem(education, scaledContentX, currentY, scaledContentWidth);
+      currentY += 20;
     }
-    y += 20;
+    currentY += sectionSpacing;
 
     // Centres d'intérêt
-    y = this.drawSectionPDF(pdfGraphics, "Centres d'intérêt", contentX, y, contentWidth);
-    y += 20;
-    y = this.drawInterestsPDF(pdfGraphics, contentX, y, contentWidth);
+    currentY = this.renderSectionTitle("Centres d'intérêt", scaledContentX, currentY, scaledContentWidth);
+    currentY += 20;
+    currentY = this.renderInterestsGrid(scaledContentX, currentY, scaledContentWidth);
 
-    // Convertir le canvas en image puis en PDF avec jsPDF
-    let canvas = pdfGraphics.canvas;
-    let imgData = canvas.toDataURL('image/png');
+    // Restaurer le graphics original IMMÉDIATEMENT
+    graphic = originalGraphic;
+    pdfGraphics.pop();
+
+    // Convertir en image et créer le PDF
+    const canvas = pdfGraphics.canvas;
+    const imgData = canvas.toDataURL('image/png');
 
     // Créer le PDF avec jsPDF
     const { jsPDF } = window.jspdf;
-    let pdf = new jsPDF('p', 'mm', 'a4');
+    const pdf = new jsPDF('p', 'mm', 'a4');
 
     // Ajouter l'image au PDF (210mm x 297mm = A4)
     pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
@@ -1046,218 +1084,6 @@ class CvPageP5 {
     console.log("Export PDF terminé !");
   }
 
-  // === MÉTHODES PDF ===
-
-  drawHeaderPDF(pdf, x, y, w) {
-    if (fonts.segoeUI) pdf.textFont(fonts.segoeUI);
-
-    let startY = y;
-    let photoSize = 80;
-    let photoX = x + w - photoSize - 20; // Position à droite
-
-    // Photo de profil (si chargée)
-    if (this.profileImg) {
-      // Cercle de fond blanc avec bordure
-      pdf.fill(255);
-      pdf.stroke(this.colors.accentLight);
-      pdf.strokeWeight(1);
-      pdf.circle(photoX + photoSize/2, startY + photoSize/2, photoSize + 2);
-
-      // Clipping circulaire pour la photo
-      pdf.push();
-      pdf.drawingContext.save();
-      pdf.drawingContext.beginPath();
-      pdf.drawingContext.arc(photoX + photoSize/2, startY + photoSize/2, photoSize/2, 0, 2 * Math.PI);
-      pdf.drawingContext.clip();
-
-      // Dessiner la photo
-      pdf.image(this.profileImg, photoX, startY, photoSize, photoSize);
-
-      pdf.drawingContext.restore();
-      pdf.pop();
-    }
-
-    // Ajuster la largeur du texte pour laisser de la place à la photo
-    let textWidth = w - photoSize - 40;
-
-    // Nom
-    pdf.fill(this.colors.text);
-    pdf.textSize(24);
-    pdf.textAlign(pdf.LEFT, pdf.TOP);
-    pdf.text(this.cvData.name, x, y);
-    y += 30;
-
-    // Titre du poste
-    pdf.fill(this.colors.accent);
-    pdf.textSize(16);
-    pdf.text(this.cvData.jobTitle, x, y);
-    y += 25;
-
-    // Contact
-    pdf.fill(this.colors.textLight);
-    pdf.textSize(12);
-    let contact = `${this.cvData.location} | ${this.cvData.email} | ${this.cvData.phone} | ${this.cvData.website}`;
-    pdf.text(contact, x, y);
-    y += 20;
-
-    // Description
-    pdf.fill(this.colors.text);
-    pdf.textSize(12);
-    let lines = this.wrapTextPDF(pdf, this.cvData.description, textWidth, 12);
-    for (let line of lines) {
-      pdf.text(line, x, y);
-      y += 15;
-    }
-
-    // S'assurer que y dépasse la photo
-    y = Math.max(y, startY + photoSize + 20);
-
-    return y;
-  }
-
-  drawSectionPDF(pdf, title, x, y, w) {
-    pdf.fill(this.colors.accent);
-    pdf.textSize(14);
-    pdf.textAlign(pdf.LEFT, pdf.TOP);
-    if (fonts.segoeUI) pdf.textFont(fonts.segoeUI);
-
-    pdf.text(title, x, y);
-    let titleWidth = pdf.textWidth(title);
-
-    // Ligne décorative
-    pdf.stroke(this.colors.accentLight);
-    pdf.strokeWeight(0.5);
-    pdf.line(x + titleWidth + 10, y + 7, x + w, y + 7);
-    pdf.noStroke();
-
-    return y + 20;
-  }
-
-  drawExperiencePDF(pdf, exp, x, y, w) {
-    if (fonts.segoeUI) pdf.textFont(fonts.segoeUI);
-
-    // Date et durée
-    pdf.fill(this.colors.accent);
-    pdf.textSize(10);
-    pdf.textAlign(pdf.LEFT, pdf.TOP);
-    pdf.text(exp.period, x, y);
-    pdf.text(exp.duration, x, y + 12);
-
-    // Titre et entreprise
-    pdf.fill(this.colors.text);
-    pdf.textSize(12);
-    let titleText = exp.title + (exp.freelance ? " (freelance)" : "");
-    pdf.text(titleText, x + 80, y);
-
-    pdf.fill(this.colors.accent);
-    pdf.textSize(10);
-    pdf.text(exp.company, x + 80, y + 15);
-
-    // Tâches
-    pdf.fill(this.colors.textMedium);
-    pdf.textSize(10);
-    let taskY = y + 30;
-    for (let task of exp.tasks) {
-      pdf.text("• " + task, x + 100, taskY);
-      taskY += 12;
-    }
-
-    return taskY + 5;
-  }
-
-  drawSkillsPDF(pdf, x, y, w) {
-    for (let skillGroup of this.cvData.skills) {
-      // Catégorie
-      pdf.fill(this.colors.textLight);
-      pdf.textSize(10);
-      if (fonts.segoeUI) pdf.textFont(fonts.segoeUI);
-      pdf.textAlign(pdf.LEFT, pdf.TOP);
-      pdf.text(skillGroup.category.toUpperCase(), x, y);
-
-      // Items
-      pdf.fill(this.colors.textMedium);
-      pdf.textSize(10);
-      let itemsText = skillGroup.items.join(" • ");
-      pdf.text(itemsText, x + 120, y);
-
-      y += 15;
-    }
-    return y;
-  }
-
-  drawFormationPDF(pdf, formation, x, y, w) {
-    if (fonts.segoeUI) pdf.textFont(fonts.segoeUI);
-
-    // Date et durée
-    pdf.fill(this.colors.accent);
-    pdf.textSize(10);
-    pdf.textAlign(pdf.LEFT, pdf.TOP);
-    pdf.text(formation.period, x, y);
-    pdf.text(formation.duration, x, y + 12);
-
-    // Titre et entreprise
-    pdf.fill(this.colors.text);
-    pdf.textSize(12);
-    pdf.text(formation.title, x + 80, y);
-
-    pdf.fill(this.colors.accent);
-    pdf.textSize(10);
-    pdf.text(formation.company, x + 80, y + 15);
-
-    // Détail si présent
-    if (formation.detail) {
-      pdf.fill(this.colors.textMedium);
-      pdf.textSize(10);
-      pdf.text("• " + formation.detail, x + 100, y + 30);
-      return y + 45;
-    }
-
-    return y + 30;
-  }
-
-  drawInterestsPDF(pdf, x, y, w) {
-    for (let interestGroup of this.cvData.interests) {
-      // Catégorie
-      pdf.fill(this.colors.textLight);
-      pdf.textSize(10);
-      if (fonts.segoeUI) pdf.textFont(fonts.segoeUI);
-      pdf.textAlign(pdf.LEFT, pdf.TOP);
-      pdf.text(interestGroup.category.toUpperCase(), x, y);
-
-      // Items
-      pdf.fill(this.colors.textMedium);
-      pdf.textSize(10);
-      let itemsText = interestGroup.items.join(" • ");
-      pdf.text(itemsText, x + 120, y);
-
-      y += 15;
-    }
-    return y;
-  }
-
-  wrapTextPDF(pdf, text, maxWidth, fontSize) {
-    if (fonts.segoeUI) pdf.textFont(fonts.segoeUI);
-    pdf.textSize(fontSize);
-
-    let words = text.split(' ');
-    let lines = [];
-    let currentLine = '';
-
-    for (let word of words) {
-      let testLine = currentLine + (currentLine ? ' ' : '') + word;
-      if (pdf.textWidth(testLine) > maxWidth && currentLine) {
-        lines.push(currentLine);
-        currentLine = word;
-      } else {
-        currentLine = testLine;
-      }
-    }
-    if (currentLine) {
-      lines.push(currentLine);
-    }
-
-    return lines;
-  }
 
   // Méthodes pour gérer le scroll avec la molette
   onMouseWheel(event) {

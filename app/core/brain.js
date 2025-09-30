@@ -37,7 +37,7 @@ function setup() {
   backgroundGraphic.background(244, 243, 241);
 
   // Position Herald en bas à gauche
-  herald = new Herald(50, height - 50);
+  herald = new Herald(50, height - 45);
 
   // Initialiser objects pages
   pages.set('mainPage', new MainPage());
@@ -88,9 +88,9 @@ function mouseDragged() {
 }
 
 async function switchTo(pageName) {
-  activePage.hide(); // fade graphic -> bg
+  await activePage.hide(); // fade graphic -> bg
   activePage = pages.get(pageName);
-  activePage.appear(); // fade bg -> graphic
+  await activePage.appear(); // fade bg -> graphic
 }
 
 function sleep(millisecondsDuration)

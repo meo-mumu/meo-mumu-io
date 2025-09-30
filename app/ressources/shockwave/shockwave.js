@@ -127,7 +127,7 @@ class Shockwave {
     this.isAppear = true;
     this.apparitionTime = 0;
     const start = performance.now();
-    const spiralPromise = this.triggerSomeSpirals();
+    const spiralPromise = this.trigger4CenterSpirals();
 
     while (this.apparitionTime < 1.0) {
       const now = performance.now();
@@ -146,7 +146,7 @@ class Shockwave {
     this.isHidding = true;
     this.hideTime = 0;
     const start = performance.now();
-    const spiralPromise = this.triggerSomeSpirals();
+    const spiralPromise = this.trigger4ExtendedSpirals();
 
     while (this.hideTime < 1.0) {
       const now = performance.now();
@@ -161,7 +161,7 @@ class Shockwave {
     console.log('Hide effect done');
   }
 
-  async triggerSomeSpirals() {
+  async trigger4CenterSpirals() {
     let options = null;
     // spiral from center  0
     options = {pointsPerTurn: 3, minRadius: 0.05, maxRadius: Math.sqrt(2) / 16, delay: 80, reverse: false, angleOffset: 0};
@@ -174,6 +174,22 @@ class Shockwave {
     this.launchOneSpiral(options);
     // spiral from center 3PI/2
     options = {pointsPerTurn: 3, minRadius: 0.05, maxRadius: Math.sqrt(2) / 14, delay: 110, reverse: false, angleOffset: 3 * Math.PI / 2 };
+    this.launchOneSpiral(options);
+  }
+
+  async trigger4ExtendedSpirals() {
+    let options = null;
+    // spiral from center  0
+    options = {pointsPerTurn: 3, minRadius: 0.05, maxRadius: Math.sqrt(2) / 2, delay: 80, reverse: false, angleOffset: 0};
+    this.launchOneSpiral(options);
+    // spiral from center  PI/2
+    options = {pointsPerTurn: 3, minRadius: 0.05, maxRadius: Math.sqrt(2) / 3, delay: 90, reverse: false, angleOffset: Math.PI / 2 };
+    this.launchOneSpiral(options);
+    // spiral from center PI
+    options = {pointsPerTurn: 3, minRadius: 0.05, maxRadius: Math.sqrt(2) / 1, delay: 100, reverse: false, angleOffset: Math.PI };
+    this.launchOneSpiral(options);
+    // spiral from center 3PI/2
+    options = {pointsPerTurn: 3, minRadius: 0.05, maxRadius: Math.sqrt(2) / 4, delay: 110, reverse: false, angleOffset: 3 * Math.PI / 2 };
     this.launchOneSpiral(options);
   }
 
