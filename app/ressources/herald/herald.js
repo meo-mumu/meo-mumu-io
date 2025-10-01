@@ -1,60 +1,100 @@
+/**
+ * herald - neural message transmission system
+ * orchestrates holographic text manifestation with synthetic typing patterns
+ */
 class Herald {
   constructor(x = 50, y = 50) {
-    // Position d'affichage
+    // spatial coordinates
     this.pos = { x, y };
 
-    // Etat du system
+    // message buffer state
     this.currentMessage = null;
     this.messageQueue = [];
     this.isTyping = false;
 
-    // Animation de frappe
+    // typing synthesis parameters
     this.currentCharIndex = 0;
-    this.typingSpeed = 15;
+    this.typingSpeed = 45;
     this.nextCharTime = 0;
     this.displayedText = "";
+    this.noiseOffset = Math.random() * 1000;
 
-    // Timing des messages
+    // character transformation tracking
+    this.charFontIndices = [];
+    this.charNoiseOffsets = [];
+
+    // temporal control
     this.messageStartTime = 0;
+    this.messageCompleteTime = 0;
     this.minDisplayTime = 0;
 
-    // Style
-    this.textSize = 16;
+    // visual configuration
+    this.textSize = 18;
     this.textColor = { r: 80, g: 80, b: 80 };
+
+    // font transformation system
+    this.initTransformationFonts();
+
+    // typing behavior matrix
+    this.TYPING_CONFIG = {
+      VOWEL_SPEED: 0.5,
+      SPACE_SPEED: 0.2,
+      PUNCTUATION_SPEED: 3.0,
+      PERLIN_SCALE: 0.01,
+      PERLIN_AMPLITUDE: 1.5,
+      CURSOR_BLINK_RATE: 500,
+      FONT_TRANSFORM_DELAY: 1200 // ms between font transformations
+    };
   }
 
-  // Ajouter un message à la queue
-  addMessage(text, minDisplayTime = 1000) {
-    //console.log("Herald addMessage:", text + " (minDisplayTime:", minDisplayTime, ")");
-    const message = {
-      text: text,
-      minDisplayTime: minDisplayTime
-    };
+  // font transformation sequence initialization
+  initTransformationFonts() {
+    this.transformationFonts = [
+      {
+        font: fonts.ancientModern,
+        sizeScale: 1.0,
+        name: "ancient"
+      },
+      {
+        font: fonts.graceOfEtro,
+        sizeScale: 1.0,
+        name: "grace"
+      },
+      {
+        font: fonts.highschoolRunes,
+        sizeScale: 1.0,
+        name: "runes"
+      },
+      {
+        font: fonts.courier,
+        sizeScale: 1.0,
+        name: "courier"
+      }
+    ];
+  }
 
-    // Si pas de message actuel, d�marrer imm�diatement
+  // message injection
+  addMessage(text, minDisplayTime = 1000) {
+    const message = { text, minDisplayTime };
+
     if (!this.currentMessage) {
       this.startMessage(message);
     } else {
-      // V�rifier si on peut remplacer le message actuel
-      if (this.canShowNext()) {
-        this.startMessage(message);
-        this.messageQueue = []; // Clear la queue
-      } else {
-        // Ajouter en queue (remplace si d�j� un message en attente)
-        this.messageQueue = [message];
-      }
+      this.messageQueue.push(message);
     }
   }
 
-  // Vérifier si on peut afficher le message suivant
+  // channel availability check
   canShowNext() {
     if (!this.currentMessage) return true;
-
-    const elapsed = millis() - this.messageStartTime;
-    return elapsed >= this.minDisplayTime && !this.isTyping;
+    if (this.isTyping) return false;
+    const elapsed = millis() - this.messageCompleteTime;
+    return elapsed >= this.minDisplayTime;
   }
 
-  // Démarrer l'affichage d'un nouveau message
+  // ------------------------------------------------------------------- synthesis engine
+
+  // initialize message transmission
   startMessage(message) {
     this.currentMessage = message;
     this.minDisplayTime = message.minDisplayTime;
@@ -62,130 +102,157 @@ class Herald {
     this.startTyping();
   }
 
-  // Démarrer l'animation de frappe
+  // begin character materialization
   startTyping() {
     this.isTyping = true;
     this.currentCharIndex = 0;
     this.displayedText = "";
     this.nextCharTime = millis() + this.getNextCharDelay();
+
+    // initialize character tracking arrays
+    this.charFontIndices = [];
+    this.charNoiseOffsets = [];
   }
 
-  // Calculer le délai pour le prochain caractère (variation de vitesse)
+  // calculate neural delay patterns
   getNextCharDelay() {
     if (!this.currentMessage) return this.typingSpeed;
 
     const nextChar = this.currentMessage.text[this.currentCharIndex];
     let delay = this.typingSpeed;
 
-    // Variation selon le caract�re
-    if (nextChar) {
-      // Voyelles plus rapides
-      if ('aeiouAEIOU'.includes(nextChar)) {
-        delay *= 0.6;
-      }
-      // Consonnes normales
-      else if (nextChar.match(/[a-zA-Z]/)) {
-        delay *= 1.0;
-      }
-      // Espaces et ponctuation
-      else if (nextChar === ' ') {
-        delay *= 0.3;
-      }
-      else if ('.,!?'.includes(nextChar)) {
-        delay *= 2.0;
-      }
-    }
+    // smoother perlin noise variance simulation
+    const perlinValue = noise(this.noiseOffset * this.TYPING_CONFIG.PERLIN_SCALE);
+    const noiseMultiplier = 0.4 + perlinValue * 0.3; // range: 0.7 to 1.3
+    delay *= noiseMultiplier;
 
-    // Variation al�atoire pour simuler l'h�sitation
-    delay *= (0.7 + Math.random() * 0.6);
+    // advance noise offset for next character
+    this.noiseOffset += 50;
 
     return delay;
   }
 
-  // Mise � jour de la logique (� appeler dans draw)
+  // main cycle update
   update() {
-    // Gestion de l'animation de frappe
-    if (this.isTyping && this.currentMessage) {
-      if (millis() >= this.nextCharTime) {
-        if (this.currentCharIndex < this.currentMessage.text.length) {
-          // Ajouter le prochain caract�re
-          this.displayedText += this.currentMessage.text[this.currentCharIndex];
-          this.currentCharIndex++;
+    this.updateTypingAnimation();
+    this.updateCharacterTransformations();
+    this.processMessageQueue();
+  }
 
-          // Programmer le prochain caract�re
-          if (this.currentCharIndex < this.currentMessage.text.length) {
-            this.nextCharTime = millis() + this.getNextCharDelay();
-          } else {
-            // Fin de l'animation
-            this.isTyping = false;
-          }
+  // update character-by-character font transformations
+  updateCharacterTransformations() {
+    // transform characters based on new character appearances with perlin noise
+    for (let i = 0; i < this.charFontIndices.length; i++) {
+      const charactersTypedSince = this.displayedText.length - 1 - i;
+      const maxFontIndex = this.transformationFonts.length - 1;
+
+      // apply perlin noise to transformation timing per character
+      const noiseValue = noise(this.charNoiseOffsets[i] + millis() * 0.001);
+      const noiseVariation = (noiseValue - 0.5) * 3; // -1.5 to +1.5 variation
+      const adjustedProgress = charactersTypedSince + noiseVariation;
+
+      // advance font index based on adjusted progress
+      const targetFontIndex = Math.min(Math.floor(adjustedProgress * 0.7), maxFontIndex);
+      this.charFontIndices[i] = Math.max(this.charFontIndices[i], targetFontIndex);
+    }
+
+    // ensure final transformation when typing is complete
+    if (!this.isTyping && this.currentMessage) {
+      for (let i = 0; i < this.charFontIndices.length; i++) {
+        this.charFontIndices[i] = this.transformationFonts.length - 1;
+      }
+    }
+  }
+
+  // character materialization loop
+  updateTypingAnimation() {
+    if (!this.isTyping || !this.currentMessage) return;
+
+    if (millis() >= this.nextCharTime) {
+      if (this.currentCharIndex < this.currentMessage.text.length) {
+        this.displayedText += this.currentMessage.text[this.currentCharIndex];
+
+        // initialize character with first font and unique noise offset
+        this.charFontIndices.push(0);
+        this.charNoiseOffsets.push(Math.random() * 1000);
+
+        this.currentCharIndex++;
+
+        if (this.currentCharIndex < this.currentMessage.text.length) {
+          this.nextCharTime = millis() + this.getNextCharDelay();
+        } else {
+          this.isTyping = false;
+          this.messageCompleteTime = millis();
         }
       }
     }
+  }
 
-    // V�rifier si on peut passer au message suivant
+  // queue processing cycle
+  processMessageQueue() {
     if (this.canShowNext() && this.messageQueue.length > 0) {
       const nextMessage = this.messageQueue.shift();
       this.startMessage(nextMessage);
     }
   }
 
-  // Rendu du texte (� appeler apr�s update)
+  // holographic projection
   render() {
-
     this.update();
-    if (!this.currentMessage) {
-      //console.log("Herald render: no current message");
-      return;
+    if (!this.currentMessage) return;
+
+    this.renderTransformingText();
+    this.renderCursor();
+  }
+
+  // render blinking cursor separately
+  renderCursor() {
+    if (this.isTyping) {
+      const cursorBlink = Math.floor(millis() / this.TYPING_CONFIG.CURSOR_BLINK_RATE) % 2;
+      if (cursorBlink) {
+        // calculate cursor position after last character
+        let xOffset = 0;
+        for (let i = 0; i < this.displayedText.length; i++) {
+          const char = this.displayedText[i];
+          const fontIndex = this.charFontIndices[i] || 0;
+          const currentFont = this.transformationFonts[fontIndex];
+
+          graphic.textFont(currentFont.font);
+          graphic.textSize(this.textSize * currentFont.sizeScale);
+          xOffset += graphic.textWidth(char);
+        }
+
+        // render cursor with current font
+        const lastFontIndex = this.charFontIndices[this.charFontIndices.length - 1] || 0;
+        const cursorFont = this.transformationFonts[lastFontIndex];
+        graphic.textFont(cursorFont.font);
+        graphic.textSize(this.textSize * cursorFont.sizeScale);
+        graphic.text("_", this.pos.x + xOffset, this.pos.y);
+      }
     }
+  }
 
-    //console.log("Herald render: displaying", this.displayedText, "at", this.pos.x, this.pos.y);
-
-
-    // Configuration du style
-    if (fonts.courier) {
-      graphic.textFont(fonts.courier);
-    }
-    graphic.textSize(this.textSize);
+  // render text with per-character font transformation
+  renderTransformingText() {
     graphic.fill(this.textColor.r, this.textColor.g, this.textColor.b);
     graphic.textAlign(graphic.LEFT, graphic.BASELINE);
 
-    // Affichage du texte en cours de frappe
-    let displayText = this.displayedText;
+    let xOffset = 0;
 
-    // Ajouter un curseur si en cours de frappe
-    if (this.isTyping) {
-      const cursorBlink = Math.floor(millis() / 500) % 2;
-      if (cursorBlink) {
-        displayText += "_";
-      }
-    }
+    for (let i = 0; i < this.displayedText.length; i++) {
+      const char = this.displayedText[i];
+      const fontIndex = this.charFontIndices[i] || 0;
+      const currentFont = this.transformationFonts[fontIndex];
 
-    graphic.text(displayText, this.pos.x, this.pos.y);
-  }
+      graphic.textFont(currentFont.font);
+      graphic.textSize(this.textSize * currentFont.sizeScale);
 
-  // M�thodes utilitaires
-  isDisplaying() {
-    return this.currentMessage !== null;
-  }
+      graphic.text(char, this.pos.x + xOffset, this.pos.y);
 
-  getCurrentMessage() {
-    return this.currentMessage ? this.currentMessage.text : null;
-  }
-
-  clearQueue() {
-    this.messageQueue = [];
-  }
-
-  setPosition(x, y) {
-    this.pos.x = x;
-    this.pos.y = y;
-  }
-
-  setStyle(size, color) {
-    this.textSize = size;
-    if (color) {
-      this.textColor = color;
+      // calculate width for next character position
+      xOffset += graphic.textWidth(char);
     }
   }
+
+
 }

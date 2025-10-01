@@ -26,6 +26,8 @@ class Shockwave {
 
     // Initialiser les shockwaves
     this.init();
+
+    this.isCvMode = false;
   }
 
   init() {
@@ -59,6 +61,7 @@ class Shockwave {
     this.shader.setUniform("image", graphic);
     this.shader.setUniform("backgroundImage", backgroundGraphic);
     this.shader.setUniform("aspect", [1, width/height]);
+    this.shader.setUniform("screenSize", [width, height]);
     this.shader.setUniform("apparitionTime", this.apparitionTime);
     this.shader.setUniform("hideTime", this.hideTime);
 
@@ -69,7 +72,25 @@ class Shockwave {
     // Uniforms pour l'effacement
     let hiddingValue = this.isHidding ? 1.0 : 0.0;
     this.shader.setUniform("isHidding", hiddingValue);
-    
+
+    // Mode CV : détecte si on est dans la page CV
+    let cvModeValue = this.isCvMode ? 1.0 : 0.0;
+    this.shader.setUniform("isCvMode", cvModeValue);
+
+    // Bounds du container CV - ajuster pour les coordonnées WEBGL
+    if (cvModeValue > 0.5) {
+      const layout = activePage.calculateLayout();
+      const container = layout.container;
+
+      // Convertir de coordonnées standard vers coordonnées WEBGL (centre = 0,0)
+      const webglX = container.x - width/2;
+      const webglY = container.y - height/2;
+
+      this.shader.setUniform("cvContainerBounds", [webglX, webglY, container.width, container.height]);
+    } else {
+      this.shader.setUniform("cvContainerBounds", [0, 0, 0, 0]);
+    }
+
     rect(-width/2, -height/2, width, height);
 
   }
@@ -183,17 +204,49 @@ class Shockwave {
   async triggerExtendedSpirals() {
     let options = null;
     // spiral from center  0
-    options = {pointsPerTurn: 3, minRadius: 0.05, maxRadius: Math.sqrt(2) / 2, delay: 80, reverse: false, angleOffset: 0};
+    options = {pointsPerTurn: 5, minRadius: 0.08, maxRadius: Math.sqrt(2) / 11, delay: 80, reverse: false, angleOffset: 0};
     this.launchOneSpiral(options);
     // spiral from center  PI/2
-    options = {pointsPerTurn: 3, minRadius: 0.05, maxRadius: Math.sqrt(2) / 3, delay: 90, reverse: false, angleOffset: Math.PI / 2 };
+    options = {pointsPerTurn: 5, minRadius: 0.08, maxRadius: Math.sqrt(2) / 10, delay: 75, reverse: false, angleOffset: Math.PI / 2 };
     this.launchOneSpiral(options);
     // spiral from center PI
-    options = {pointsPerTurn: 3, minRadius: 0.05, maxRadius: Math.sqrt(2) / 1, delay: 100, reverse: false, angleOffset: Math.PI };
+    options = {pointsPerTurn: 5, minRadius: 0.08, maxRadius: Math.sqrt(2) / 13, delay: 74, reverse: false, angleOffset: Math.PI };
     this.launchOneSpiral(options);
     // spiral from center 3PI/2
-    options = {pointsPerTurn: 3, minRadius: 0.05, maxRadius: Math.sqrt(2) / 4, delay: 110, reverse: false, angleOffset: 3 * Math.PI / 2 };
+    options = {pointsPerTurn: 5, minRadius: 0.08, maxRadius: Math.sqrt(2) / 12, delay: 83, reverse: false, angleOffset: 3 * Math.PI / 2 };
     this.launchOneSpiral(options);
+
+    // await sleep(2000);
+
+    // options = null;
+    // // spiral from center  0
+    // options = {pointsPerTurn: 5, minRadius: 0.23, maxRadius: Math.sqrt(2) / 7, delay: 80, reverse: false, angleOffset: 0};
+    // this.launchOneSpiral(options);
+    // // spiral from center  PI/2
+    // options = {pointsPerTurn: 5, minRadius: 0.22, maxRadius: Math.sqrt(2) / 8, delay: 90, reverse: false, angleOffset: Math.PI / 2 };
+    // this.launchOneSpiral(options);
+    // // spiral from center PI
+    // options = {pointsPerTurn: 5, minRadius: 0.20, maxRadius: Math.sqrt(2) / 6, delay: 85, reverse: false, angleOffset: Math.PI };
+    // this.launchOneSpiral(options);
+    // // spiral from center 3PI/2
+    // options = {pointsPerTurn: 5, minRadius: 0.21, maxRadius: Math.sqrt(2) / 7, delay: 75, reverse: false, angleOffset: 3 * Math.PI / 2 };
+    // this.launchOneSpiral(options);
+
+    // await sleep(1000);
+
+    // options = null;
+    // // spiral from center  0
+    // options = {pointsPerTurn: 3, minRadius: 0.5, maxRadius: Math.sqrt(2) / 6, delay: 130, reverse: true, angleOffset: 0};
+    // this.launchOneSpiral(options);
+    // // spiral from center  PI/2
+    // options = {pointsPerTurn: 3, minRadius: 0.5, maxRadius: Math.sqrt(2) / 8, delay: 130, reverse: true, angleOffset: Math.PI / 2 };
+    // this.launchOneSpiral(options);
+    // // spiral from center PI
+    // options = {pointsPerTurn: 3, minRadius: 0.5, maxRadius: Math.sqrt(2) / 6, delay: 130, reverse: true, angleOffset: Math.PI };
+    // this.launchOneSpiral(options);
+    // // spiral from center 3PI/2
+    // options = {pointsPerTurn: 3, minRadius: 0.5, maxRadius: Math.sqrt(2) / 7, delay: 130, reverse: true, angleOffset: 3 * Math.PI / 2 };
+    // this.launchOneSpiral(options);
   }
 
   async launchOneSpiral(options) {

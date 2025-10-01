@@ -15,9 +15,10 @@ uniform vec2[NUM_SHOCKWAVES] centres;
 uniform float[NUM_SHOCKWAVES] times;
 uniform float[NUM_SHOCKWAVES] sizes;
 
-uniform float isErasing;
+uniform float isHidding;
 uniform float isAppear;
 uniform float apparitionTime;
+uniform float hideTime;
 
 const float maxRadius = 0.5;
 
@@ -71,7 +72,7 @@ void main() {
     }
 
     // --- Effet d'onde sur le texte révélé ---
-    float shading = totalOffsets.g * 5.0;
+    float shading = totalOffsets.g * 6.0;
     vec2 offsetR = correctedPos + totalDir * totalOffsets.r;
     vec2 offsetG = correctedPos + totalDir * totalOffsets.g;
     vec2 offsetB = correctedPos + totalDir * totalOffsets.b;
@@ -85,14 +86,23 @@ void main() {
     vec3 revealedColor = mix(bgColor, waveColor, revealMask);
 
     // --- Apparition centrale contrôlée par apparitionTime ---
-    float centerFade = 0.0;
     if (isAppear > 0.5) {
         // Fade progressif du texte pur sur le fond
-        vec3 fadedText = mix(bgColor, fgColor, pow(apparitionTime, 2.0));
+        vec3 fadedText = mix(bgColor, fgColor,  clamp(pow(apparitionTime, 1.5), 0.0, 1.0));
         // Puis onde par-dessus le texte fade
         vec3 finalColor = mix(fadedText, vec3(0.15, 0.15, 0.18), clamp(abs(shading), 0.0, 1.0));
         colour = vec4(finalColor, 1.0);
-    } else {
+    }
+    // --- Disparition centrale contrôlée par hideTime ---
+    else if (isHidding > 0.5) {
+        // Fade progressif du texte vers le fond (inverse de l'apparition) en logarithmique pour un effet plus rapide au début
+        vec3 fadedText = mix(fgColor, bgColor, clamp(hideTime*2.0, 0.0, 1.0));
+        // Puis onde par-dessus le texte fade
+        vec3 finalColor = mix(fadedText, vec3(0.15, 0.15, 0.18), clamp(abs(shading), 0.0, 1.0));
+        colour = vec4(finalColor, 1.0);
+    }
+    else {
+        // État normal : afficher le texte avec les effets de vagues
         colour = vec4(waveColor, 1.0);
     }
 }

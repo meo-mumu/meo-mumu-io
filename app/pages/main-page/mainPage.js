@@ -32,10 +32,12 @@ class MainPage {
 
   async appear() {
     console.log('MainPage appear');
-    shockwave.appearEffect(type = "central-bubbling");
-    await sleep(5000);
-    herald.addMessage("> Hello there", 3000);
-    herald.addMessage("> Try Moving the mouse", 10000);
+    shockwave.appearEffect("central-bubbling");
+    await sleep(1000);
+    herald.addMessage("Hello there. this is a test message. Which is very long to do", 3000);
+    herald.addMessage("Try Moving the mouse. And this is another bandicoot housing.", 3000);
+    herald.addMessage("Click on the text to navigate.", 3000);
+    herald.addMessage("Enjoy the experience.", 3000);
   }
 
   async hide() {
