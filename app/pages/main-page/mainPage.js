@@ -33,16 +33,14 @@ class MainPage {
   async appear() {
     console.log('MainPage appear');
     shockwave.appearEffect("central-bubbling");
-    await sleep(1000);
-    herald.addMessage("Hello there. this is a test message. Which is very long to do", 3000);
-    herald.addMessage("Try Moving the mouse. And this is another bandicoot housing.", 3000);
-    herald.addMessage("Click on the text to navigate.", 3000);
-    herald.addMessage("Enjoy the experience.", 3000);
+    await sleep(3000);
+    herald.addMessage("> Hello :)", 1000);
+    herald.addMessage("> Contact at leomacias@hotmail.fr", 3000);
   }
 
   async hide() {
     console.log('MainPage hide');
-    shockwave.hideEffect();
+    await shockwave.hideEffect("central-bubbling");
   }
 
   render() {

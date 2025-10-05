@@ -4,50 +4,94 @@
 class CvPageAnimations {
   constructor(cvPage) {
     this.cvPage = cvPage;
+    this.initMysticalFonts();
   }
+
+  // -------------------------------------------- mystical fonts setup
+
+  initMysticalFonts() {
+    this.mysticalFonts = [
+      fonts.highschoolRunes,
+      fonts.graceOfEtro,
+      fonts.ancientModern
+    ];
+    this.finalFont = fonts.segoeUI; // police finale pour tout le texte
+  }
+
+  // -------------------------------------------- animation glitch
 
   startEmergenceAnimation() {
     this.cvPage.emergenceState.isAnimating = true;
-    this.cvPage.emergenceState.progress = 0;
-    this.cvPage.emergenceState.shadowIntensity = 0; // Commencer à 0
+    this.cvPage.emergenceState.typingProgress = 0;
+    this.cvPage.emergenceState.charFontIndices.clear();
+    this.cvPage.emergenceState.charNoiseOffsets.clear();
+    this.cvPage.emergenceState.shadowIntensity = 0;
 
-    const duration = 8000; // 8 secondes
+    const totalDuration = 3000;
     const startTime = Date.now();
-    const frameRate = 60;
-    const frameInterval = 1000 / frameRate;
 
-    console.log('Starting emergence animation - duration:', duration, 'ms');
+    console.log('Starting herald-style typing animation - duration:', totalDuration, 'ms');
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1.0);
+      const progress = Math.min(elapsed / totalDuration, 1.0);
 
-      console.log('Animation progress:', Math.floor(progress * 100) + '%', 'elapsed:', elapsed + 'ms');
+      this.cvPage.emergenceState.typingProgress = progress;
 
-      // Courbe ease-out plus douce pour un fade progressif
-      const eased = 1 - Math.pow(1 - progress, 4);
-
-      this.cvPage.emergenceState.progress = eased;
-      this.cvPage.emergenceState.scale = lerp(0.99, 1.0, eased);
-
-      // Animation des shadows : fade très progressif
-      const shadowProgress = Math.pow(progress, 3);
-      this.cvPage.emergenceState.shadowIntensity = shadowProgress;
-
-      // Transition du style : inset au début, raised à la fin
-      this.cvPage.emergenceState.neomorphicStyle = eased > 0.6 ? 'raised' : 'inset';
+      // shadow fade-in
+      this.cvPage.emergenceState.shadowIntensity = Math.pow(progress, 1.5);
 
       if (progress < 1) {
-        setTimeout(animate, frameInterval);
+        requestAnimationFrame(animate);
       } else {
         this.cvPage.emergenceState.isAnimating = false;
-        this.cvPage.emergenceState.neomorphicStyle = 'raised';
         this.cvPage.emergenceState.shadowIntensity = 1;
-        console.log('Emergence animation completed');
+        console.log('Herald-style typing animation completed');
       }
     };
 
     animate();
+  }
+
+  // retourne la font pour un caractère (logique herald)
+  getGlitchFontForChar(charId, sectionId, charIndex, totalDisplayedChars) {
+    const state = this.cvPage.emergenceState;
+
+    // initialiser le caractère si nouveau
+    if (!state.charFontIndices.has(charId)) {
+      state.charFontIndices.set(charId, 0);
+      state.charNoiseOffsets.set(charId, Math.random() * 1000);
+    }
+
+    // logique herald: combien de caractères tapés APRÈS ce caractère
+    const charactersTypedSince = totalDisplayedChars - 1 - charIndex;
+    const maxFontIndex = this.mysticalFonts.length;
+
+    // perlin noise pour désynchroniser
+    const noiseOffset = state.charNoiseOffsets.get(charId);
+    const noiseValue = noise(noiseOffset + millis() * 0.001);
+    const noiseVariation = (noiseValue - 0.5) * 3;
+
+    // progression basée sur charactersTypedSince (comme herald)
+    const adjustedProgress = charactersTypedSince + noiseVariation;
+
+    // calculer le targetFontIndex
+    const targetFontIndex = Math.min(Math.floor(adjustedProgress * 0.7), maxFontIndex);
+    const currentFontIndex = state.charFontIndices.get(charId);
+    const newFontIndex = Math.max(currentFontIndex, targetFontIndex);
+
+    // mettre à jour
+    state.charFontIndices.set(charId, newFontIndex);
+
+    // construire le tableau de fonts
+    const allFonts = [...this.mysticalFonts, this.finalFont];
+
+    // forcer la police finale si animation terminée
+    if (!state.isAnimating) {
+      return this.finalFont;
+    }
+
+    return allFonts[newFontIndex];
   }
 
   // Méthodes d'application des shadows avec animation
@@ -79,24 +123,5 @@ class CvPageAnimations {
       offsetY: this.cvPage.SHADOW_CONFIG.NORMAL.offsetY * intensity
     };
     this.applyShadowWithConfig(animatedConfig, drawFunction);
-  }
-
-  applyRadialRevealMask(x, y, width, height) {
-    graphic.drawingContext.save();
-    graphic.drawingContext.beginPath();
-
-    // Centre du container
-    const centerX = x + width / 2;
-    const centerY = y + height / 2;
-
-    // Rayon maximum pour couvrir tout le container (diagonal)
-    const maxRadius = Math.sqrt(width * width + height * height) / 2;
-
-    // Rayon actuel basé sur le progress de l'animation
-    const currentRadius = this.cvPage.emergenceState.revealRadius * maxRadius;
-
-    // Créer un masque circulaire
-    graphic.drawingContext.arc(centerX, centerY, currentRadius, 0, TWO_PI);
-    graphic.drawingContext.clip();
   }
 }

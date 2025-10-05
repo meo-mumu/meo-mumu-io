@@ -45,8 +45,8 @@ function setup() {
   // pages.set('shaderland', new ShaderLand());
 
   // Démarrer sur mainPage
-  activePage = pages.get('mainPage');
-  activePage.appear();
+  activePage = pages.get('cvPage');
+  //activePage.appear();
 }
 
 function draw() {

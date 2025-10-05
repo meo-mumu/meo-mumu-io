@@ -25,17 +25,20 @@ class CvPageP5 {
       EDUCATION_TITLE_OFFSET: 150,
       SECTION_SPACING: 20,
       TAG_HEIGHT: 26,
-      TAG_PADDING: 20,
+      TAG_PADDING: 16,
       TAG_LINE_SPACING: 30
     };
 
-    // Animation state for emergence effect (style herald)
+    // Animation state for emergence effect
     this.emergenceState = {
       isAnimating: false,
-      typingProgress: 0,         // progression du typing (0 -> 1)
-      charFontIndices: new Map(), // Map<charId, fontIndex> : index de font par caractère
-      charNoiseOffsets: new Map(), // Map<charId, noiseOffset> : offset perlin noise par caractère
-      shadowIntensity: 0.0
+      progress: 0,
+      barWidth: 0,         // largeur de la barre horizontale (0 -> container width)
+      barHeight: 0,        // hauteur de la barre (commence petit, s'ouvre vers haut/bas)
+      contentOpacity: 0,   // opacité du contenu du CV
+      scale: 1.0,
+      shadowIntensity: 1.0,
+      neomorphicStyle: 'raised'
     };
 
     this.scrollState = {
@@ -81,8 +84,8 @@ class CvPageP5 {
     console.log('CvPageP5 appear');
 
     // Lancer le shockwave effect et l'animation d'émergence en parallèle
-    shockwave.appearEffect("extended-bubbling");
     this.animator.startEmergenceAnimation();
+    //shockwave.appearEffect('extended-bubbling');
 
     await sleep(5000);
     herald.addMessage("> Voici mon CV en p5.js", 3000);
@@ -91,7 +94,7 @@ class CvPageP5 {
   async hide() {
     console.log('CvPageP5 hide');
     shockwave.cvMode = false;
-    await shockwave.hideEffect("extended-bubbling");
+    await shockwave.hideEffect();
   }
 
   // === UTILITY METHODS ===
@@ -108,7 +111,7 @@ class CvPageP5 {
   setTextStyle(size, colorArray, align = graphic.LEFT, context = graphic) {
     this.applyFont(context);
     context.textSize(size);
-    context.textAlign(align, context.BASELINE);
+    context.textAlign(align, context.TOP);
     this.applyColor(colorArray, context);
   }
 
