@@ -134,10 +134,10 @@ const CV_THEME = {
 
   typography: {
     nameSize: 42,
-    titleSize: 28,
-    contactSize: 18,
+    titleSize: 32,
+    contactSize: 20,
     descriptionSize: 18,
-    sectionTitleSize: 22,
+    sectionTitleSize: 24,
     experienceTitleSize: 18,
     experienceMetaSize: 16,
     experienceTaskSize: 16

@@ -63,44 +63,34 @@ class CvPageInteractions {
     const layout = this.cvPage.calculateLayout();
     const container = layout.container;
 
-    // Ajuster les coordonnées pour le système WEBGL (même logique que dans shockwave)
-    const adjustedMouseX = mouseX - width/2;
-    const adjustedMouseY = mouseY - height/2;
-
-    // Convertir les bounds du container en coordonnées WEBGL
-    const webglX = container.x - width/2;
-    const webglY = container.y - height/2;
-
-    return adjustedMouseX >= webglX &&
-           adjustedMouseX <= webglX + container.width &&
-           adjustedMouseY >= webglY &&
-           adjustedMouseY <= webglY + container.height;
+    return mouseX >= container.x &&
+           mouseX <= container.x + container.width &&
+           mouseY >= container.y &&
+           mouseY <= container.y + container.height;
   }
 
   isMouseOnScrollbar() {
     const bounds = this.cvPage.ui.scrollbarBounds;
-    const adjustedMouseX = mouseX - width/2;
-    const adjustedMouseY = mouseY - height/2;
-    return adjustedMouseX >= bounds.trackX &&
-           adjustedMouseX <= bounds.trackX + bounds.trackWidth &&
-           adjustedMouseY >= bounds.trackY &&
-           adjustedMouseY <= bounds.trackY + bounds.trackHeight;
+    // Zone interactive élargie pour inclure le thumb (qui est plus large que le track)
+    const interactiveX = bounds.thumbX;
+    const interactiveWidth = bounds.thumbWidth;
+    return mouseX >= interactiveX &&
+           mouseX <= interactiveX + interactiveWidth &&
+           mouseY >= bounds.trackY &&
+           mouseY <= bounds.trackY + bounds.trackHeight;
   }
 
   isMouseOnThumb() {
     const bounds = this.cvPage.ui.scrollbarBounds;
-    const adjustedMouseX = mouseX - width/2;
-    const adjustedMouseY = mouseY - height/2;
-    return adjustedMouseX >= bounds.thumbX &&
-           adjustedMouseX <= bounds.thumbX + bounds.thumbSize &&
-           adjustedMouseY >= bounds.thumbY &&
-           adjustedMouseY <= bounds.thumbY + bounds.thumbSize;
+    return mouseX >= bounds.thumbX &&
+           mouseX <= bounds.thumbX + bounds.thumbWidth &&
+           mouseY >= bounds.thumbY &&
+           mouseY <= bounds.thumbY + bounds.thumbHeight;
   }
 
   jumpToMousePosition() {
     const bounds = this.cvPage.ui.scrollbarBounds;
-    const adjustedMouseY = mouseY - height/2;
-    const relativeY = adjustedMouseY - bounds.trackY;
+    const relativeY = mouseY - bounds.trackY;
     const trackProgress = constrain(relativeY / bounds.trackHeight, 0, 1);
     this.cvPage.scrollState.target = trackProgress * this.cvPage.scrollState.max;
   }

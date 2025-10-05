@@ -10,8 +10,11 @@ class CvPageRenderers {
   // -------------------------------------------- glitch text rendering
 
   // render une section de texte avec transformation herald
-  renderSectionWithGlitch(text, x, y, size) {
+  renderSectionWithGlitch(text, x, y, size, bold = false) {
     if (!this.cvPage.emergenceState.isAnimating) {
+      if (bold) {
+        graphic.drawingContext.font = `bold ${size}px "Segoe UI"`;
+      }
       graphic.text(text, x, y);
       return;
     }
@@ -57,8 +60,8 @@ class CvPageRenderers {
   }
 
   // alias pour compatibilité
-  renderTextWithGlitch(text, x, y, size) {
-    this.renderSectionWithGlitch(text, x, y, size);
+  renderTextWithGlitch(text, x, y, size, bold = false) {
+    this.renderSectionWithGlitch(text, x, y, size, bold);
   }
 
   // === CORE RENDERING ===
@@ -98,7 +101,7 @@ class CvPageRenderers {
 
     graphic.translate(0, -this.cvPage.scrollState.current);
 
-    const uniformSpacing = 40; // Espacement uniforme partout
+    const uniformSpacing = 50; // Espacement uniforme entre sections
     let currentY = layout.content.startY;
 
     currentY = this.renderHeader(layout.content.x, currentY, layout.content.width);
@@ -136,9 +139,9 @@ class CvPageRenderers {
 
     // Ombre foncée (bas/droite)
     graphic.drawingContext.shadowColor = 'rgba(163, 177, 198, 0.6)';
-    graphic.drawingContext.shadowBlur = 20;
-    graphic.drawingContext.shadowOffsetX = 10;
-    graphic.drawingContext.shadowOffsetY = 10;
+    graphic.drawingContext.shadowBlur = 15;
+    graphic.drawingContext.shadowOffsetX = 6;
+    graphic.drawingContext.shadowOffsetY = 6;
 
     graphic.fill(...this.cvPage.COLORS.BACKGROUND);
     graphic.noStroke();
@@ -238,13 +241,13 @@ class CvPageRenderers {
 
     // Job title
     this.cvPage.setTextStyle(theme.typography.titleSize, theme.colors.accent);
-    this.renderTextWithGlitch(personal.jobTitle, x, y, theme.typography.titleSize);
+    this.renderTextWithGlitch(personal.jobTitle, x, y, theme.typography.titleSize, true); // bold
     y += theme.typography.titleSize + gapBetweenLines;
 
     // Contact info
     this.cvPage.setTextStyle(theme.typography.contactSize, theme.colors.textSecondary);
     const contact = `${personal.location}  |  ${personal.email}  |  ${personal.phone}  |  ${personal.website}`;
-    this.renderTextWithGlitch(contact, x, y, theme.typography.contactSize);
+    this.renderTextWithGlitch(contact, x, y, theme.typography.contactSize, true); // bold
     y += theme.typography.contactSize;
 
     // Description below photo - même espacement qu'après la description
@@ -339,7 +342,7 @@ class CvPageRenderers {
 
   renderSectionTitle(title, x, y, width) {
     this.cvPage.setTextStyle(this.cvPage.theme.typography.sectionTitleSize, this.cvPage.theme.colors.accent);
-    this.renderTextWithGlitch(title, x, y, this.cvPage.theme.typography.sectionTitleSize);
+    this.renderTextWithGlitch(title, x, y, this.cvPage.theme.typography.sectionTitleSize, true); // bold = true
     const titleWidth = graphic.textWidth(title);
 
     // Decorative line avec shadow néomorphique (ajusté pour BASELINE)
@@ -358,7 +361,7 @@ class CvPageRenderers {
     const theme = this.cvPage.theme;
 
     // Calculate the height of this experience item to size the side bar appropriately
-    const itemHeight = 30 + (experience.tasks.length * 20);
+    const itemHeight = 30 + (experience.tasks.length * 25);
 
     // Side bar avec shadow néomorphique - aligned with content (ajusté pour BASELINE)
     const barY = y - theme.typography.experienceMetaSize + 4; // Remonter pour aligner avec le haut du texte
@@ -370,11 +373,11 @@ class CvPageRenderers {
 
     // Period and duration - offset to accommodate bar
     this.cvPage.setTextStyle(theme.typography.experienceMetaSize, theme.colors.accent);
-    this.renderTextWithGlitch(experience.period, x + 10, y, theme.typography.experienceMetaSize);
+    this.renderTextWithGlitch(experience.period, x + 16, y, theme.typography.experienceMetaSize);
 
     graphic.textSize(12);
     this.cvPage.applyColor([...theme.colors.accent, 180]);
-    this.renderTextWithGlitch(experience.duration, x + 10, y + 20, 12);
+    this.renderTextWithGlitch(experience.duration, x + 16, y + 20, 12);
 
     // Title - shifted right
     this.cvPage.setTextStyle(theme.typography.experienceTitleSize, theme.colors.textPrimary);
@@ -390,7 +393,7 @@ class CvPageRenderers {
     let taskY = y + 30;
     for (const task of experience.tasks) {
       this.renderTaskWithBoldTech(task, x + this.cvPage.LAYOUT_CONSTANTS.TASK_OFFSET, taskY, theme.typography.experienceTaskSize);
-      taskY += this.cvPage.LAYOUT_CONSTANTS.SECTION_SPACING;
+      taskY += 25; // Plus d'interligne entre les tâches
     }
 
     return taskY; // Remove extra spacing
@@ -482,7 +485,7 @@ class CvPageRenderers {
     const trackX = x + width - 12;
     const trackY = y + 20;
     const trackHeight = height - 40;
-    const trackWidth = 4;
+    const trackWidth = 2;
 
     // Background track avec shadow renforcé
     this.cvPage.animator.applyShadow(() => {
@@ -494,22 +497,23 @@ class CvPageRenderers {
     // Calculate scroll progress
     const scrollProgress = constrain(this.cvPage.scrollState.current / this.cvPage.scrollState.max, 0, 1);
 
-    // Thumb positioning
-    const thumbSize = 8;
-    const thumbTravel = trackHeight - thumbSize;
+    // Thumb positioning - rectangle vertical avec bords très arrondis
+    const thumbWidth = 8;
+    const thumbHeight = 22;
+    const thumbTravel = trackHeight - thumbHeight;
     const thumbY = trackY + (scrollProgress * thumbTravel);
-    const thumbX = trackX - 2;
+    const thumbX = trackX - 3; // Centré sur le track (trackWidth=2, thumbWidth=8)
 
-    // Main thumb avec shadow renforcé
+    // Main thumb avec shadow renforcé et couleur plus pale
     this.cvPage.animator.applyShadow(() => {
-      this.cvPage.applyColor(this.cvPage.theme.colors.accent);
-      graphic.rect(thumbX, thumbY, thumbSize, thumbSize);
+      this.cvPage.applyColor([...this.cvPage.theme.colors.accent, 128]); // Alpha 0.5 pour plus pale
+      graphic.rect(thumbX, thumbY, thumbWidth, thumbHeight, 20); // Border radius très arrondi
     });
 
     // Store bounds for interaction
     this.cvPage.ui.scrollbarBounds = {
       trackX, trackY, trackWidth, trackHeight,
-      thumbX, thumbY, thumbSize
+      thumbX, thumbY, thumbWidth, thumbHeight
     };
   }
 
