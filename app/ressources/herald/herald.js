@@ -74,8 +74,8 @@ class Herald {
   }
 
   // message injection
-  addMessage(text, minDisplayTime = 1000) {
-    const message = { text, minDisplayTime };
+  addMessage(text, minDisplayTime = 1000, action = null) {
+    const message = { text, minDisplayTime, action };
 
     if (!this.currentMessage) {
       this.startMessage(message);
@@ -234,7 +234,17 @@ class Herald {
 
   // render text with per-character font transformation
   renderTransformingText() {
-    graphic.fill(this.textColor.r, this.textColor.g, this.textColor.b);
+    // Detect hover for clickable messages
+    const isHovering = this.isHoveringMessage();
+    const isClickable = this.currentMessage && this.currentMessage.action;
+
+    // Change color if hovering over clickable message
+    if (isClickable && isHovering) {
+      graphic.fill(this.textColor.r + 40, this.textColor.g + 40, this.textColor.b + 40);
+    } else {
+      graphic.fill(this.textColor.r, this.textColor.g, this.textColor.b);
+    }
+
     graphic.textAlign(graphic.LEFT, graphic.BASELINE);
 
     let xOffset = 0;
@@ -252,7 +262,37 @@ class Herald {
       // calculate width for next character position
       xOffset += graphic.textWidth(char);
     }
+
+    // Store bounds for interaction
+    this.messageBounds = {
+      x: this.pos.x,
+      y: this.pos.y - this.textSize,
+      width: xOffset,
+      height: this.textSize * 1.5
+    };
   }
 
+  // ------------------------------------------------------------------- interaction
+
+  isHoveringMessage() {
+    if (!this.currentMessage || !this.messageBounds) return false;
+
+    const bounds = this.messageBounds;
+    return mouseX >= bounds.x &&
+           mouseX <= bounds.x + bounds.width &&
+           mouseY >= bounds.y &&
+           mouseY <= bounds.y + bounds.height;
+  }
+
+  onMousePressed() {
+    if (!this.currentMessage || !this.currentMessage.action) return false;
+
+    if (this.isHoveringMessage()) {
+      this.currentMessage.action();
+      return true;
+    }
+
+    return false;
+  }
 
 }

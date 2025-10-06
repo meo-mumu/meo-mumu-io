@@ -9,8 +9,7 @@ const CV_CONTENT = {
     photoPath: "pages/curriculum-vitae/me-pro.PNG"
   },
 
-  description: "Après cinq années en data engineering, j’ai choisi le freelancing pour continuer à progresser en autodidacte et élargir mon champ d’action, notamment à travers mes recherches personnelles en sound design et art numérique. Je préfère comprendre les choses en profondeur et construire sur des bases solides plutôt que d’accumuler les solutions rapides. Je mets aujourd'hui ma rigueur et ma capacité d'adaptation au service de projets exigeants et innovants",
-
+  description: "Je suis passionné par les technologies de l'information et le développement logiciel. Après cinq années en data engineering, j’ai choisi le freelancing pour continuer à progresser en autodidacte et élargir mon champ d’action, notamment à travers mes recherches personnelles en sound design et art numérique. Je mets aujourd'hui ma rigueur et ma capacité d'adaptation au service de projets exigeants et innovants",
   experiences: [
     {
       period: "2024-2025",

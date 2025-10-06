@@ -45,7 +45,7 @@ function setup() {
   // pages.set('shaderland', new ShaderLand());
 
   // Démarrer sur mainPage
-  activePage = pages.get('cvPage');
+  activePage = pages.get('mainPage');
   //activePage.appear();
 }
 
@@ -59,11 +59,23 @@ function draw() {
   shockwave.render();
 }
 
+async function switchTo(pageName) {
+  // await activePage.hide(); // fade graphic -> bg
+  activePage = pages.get(pageName);
+  await activePage.appear(); // fade bg -> graphic
+}
+
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 }
 
 function mousePressed() {
+  // Check herald first (highest priority)
+  if (herald && herald.onMousePressed()) {
+    return;
+  }
+
+  // Then check active page
   if (activePage) {
     activePage.onMousePressed();
   }
@@ -85,12 +97,6 @@ function mouseDragged() {
   if (activePage && activePage.onMouseDragged) {
     activePage.onMouseDragged();
   }
-}
-
-async function switchTo(pageName) {
-  await activePage.hide(); // fade graphic -> bg
-  activePage = pages.get(pageName);
-  await activePage.appear(); // fade bg -> graphic
 }
 
 function sleep(millisecondsDuration)

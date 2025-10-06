@@ -58,6 +58,11 @@ class CvPageP5 {
     this.theme = CV_THEME;
     this.content = CV_CONTENT;
 
+    // Export mode flag
+    this.isPdfExport = false;
+    this.pdfTextScale = 1.5; // Augmente les textes de 50% pour le PDF
+    this.pdfPhotoScale = 1.4; // Augmente la photo de 40% pour le PDF
+
     // Initialize modules
     this.animator = new CvPageAnimations(this);
     this.renderer = new CvPageRenderers(this);
@@ -83,9 +88,10 @@ class CvPageP5 {
     // Lancer le shockwave effect et l'animation d'émergence en parallèle
     shockwave.appearEffect("extended-bubbling");
     this.animator.startEmergenceAnimation();
-
     await sleep(5000);
-    herald.addMessage("> Voici mon CV en p5.js", 3000);
+    herald.addMessage("> Click here to export a PDF version", 3000, () => {
+      this.exporter.exportToPDF();
+    });
   }
 
   async hide() {
@@ -107,9 +113,21 @@ class CvPageP5 {
 
   setTextStyle(size, colorArray, align = graphic.LEFT, context = graphic) {
     this.applyFont(context);
-    context.textSize(size);
+    context.textSize(this.getScaledSize(size));
     context.textAlign(align, context.BASELINE);
     this.applyColor(colorArray, context);
+  }
+
+  getScaledSize(size) {
+    return this.isPdfExport ? size * this.pdfTextScale : size;
+  }
+
+  getScaledSpacing(spacing) {
+    return this.isPdfExport ? spacing * this.pdfTextScale : spacing;
+  }
+
+  getScaledPhotoSize(size) {
+    return this.isPdfExport ? size * this.pdfPhotoScale : size;
   }
 
   createClippingMask(x, y, width, height, borderRadius = 0, context = graphic) {
@@ -132,7 +150,7 @@ class CvPageP5 {
 
   wrapText(text, maxWidth, fontSize, context = graphic) {
     this.applyFont(context);
-    context.textSize(fontSize);
+    context.textSize(this.getScaledSize(fontSize));
 
     const words = text.split(' ');
     const lines = [];

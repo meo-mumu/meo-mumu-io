@@ -31,12 +31,12 @@ class CvPageRenderers {
 
     if (currentAlign === 'right') {
       this.cvPage.applyFont();
-      graphic.textSize(size);
+      graphic.textSize(this.cvPage.getScaledSize(size));
       const totalWidth = graphic.textWidth(text);
       startX = x - totalWidth;
     } else if (currentAlign === 'center') {
       this.cvPage.applyFont();
-      graphic.textSize(size);
+      graphic.textSize(this.cvPage.getScaledSize(size));
       const totalWidth = graphic.textWidth(text);
       startX = x - totalWidth / 2;
     }
@@ -51,7 +51,7 @@ class CvPageRenderers {
 
       const font = this.cvPage.animator.getGlitchFontForChar(charId, sectionId, i, displayedChars);
       graphic.textFont(font);
-      graphic.textSize(size);
+      graphic.textSize(this.cvPage.getScaledSize(size));
       graphic.text(char, currentX, y);
       currentX += graphic.textWidth(char);
     }
@@ -101,7 +101,7 @@ class CvPageRenderers {
 
     graphic.translate(0, -this.cvPage.scrollState.current);
 
-    const uniformSpacing = 50; // Espacement uniforme entre sections
+    const uniformSpacing = this.cvPage.getScaledSpacing(50); // Espacement uniforme entre sections
     let currentY = layout.content.startY;
 
     currentY = this.renderHeader(layout.content.x, currentY, layout.content.width);
@@ -191,12 +191,13 @@ class CvPageRenderers {
       drawTag();
     }
 
-    // Tag text - perfectly centered en gras
+    // Tag text - perfectly centered en gras avec taille scalée
+    const scaledSize = this.cvPage.getScaledSize(14);
     graphic.textAlign(graphic.LEFT, graphic.CENTER);
     this.cvPage.applyColor(this.cvPage.theme.colors.textMedium);
-    graphic.textSize(14);
+    graphic.textSize(scaledSize);
     this.cvPage.applyFont();
-    graphic.drawingContext.font = 'bold 14px "Segoe UI"'; // Texte en gras
+    graphic.drawingContext.font = `bold ${scaledSize}px "Segoe UI"`; // Texte en gras avec taille scalée
     const textWidth = graphic.textWidth(text);
     const textX = tagX + (tagWidth - textWidth) / 2;
     const textY = tagY + tagHeight/2 - 1;
@@ -212,7 +213,7 @@ class CvPageRenderers {
 
     // Calculate text positions first to determine photo position
     const totalTextHeight = theme.typography.nameSize + theme.typography.titleSize + theme.typography.contactSize;
-    const photoSize = theme.dimensions.photoSize;
+    const photoSize = this.cvPage.getScaledPhotoSize(theme.dimensions.photoSize);
     const remainingSpace = photoSize - totalTextHeight;
     const gapBetweenLines = remainingSpace / 3;
 
@@ -227,7 +228,7 @@ class CvPageRenderers {
     // Render profile photo
     if (this.cvPage.assets.profileImage) {
       const restoreClipping = this.cvPage.createClippingMask(
-        photoX, photoY, photoSize, photoSize, theme.dimensions.photoRadius
+        photoX, photoY, photoSize, photoSize, this.cvPage.getScaledPhotoSize(theme.dimensions.photoRadius)
       );
       graphic.image(this.cvPage.assets.profileImage, photoX, photoY, photoSize, photoSize);
       restoreClipping();
@@ -251,13 +252,13 @@ class CvPageRenderers {
     y += theme.typography.contactSize;
 
     // Description below photo - même espacement qu'après la description
-    const descriptionY = Math.max(y, photoY + photoSize) + 40; // 40px après contact OU photo
+    const descriptionY = Math.max(y, photoY + photoSize) + this.cvPage.getScaledSpacing(40); // 40px après contact OU photo
     this.cvPage.setTextStyle(theme.typography.descriptionSize, theme.colors.textPrimary);
     const lines = this.cvPage.wrapText(this.cvPage.content.description, width, theme.typography.descriptionSize);
     let currentDescY = descriptionY;
     for (const line of lines) {
       this.renderTextWithGlitch(line, x, currentDescY, theme.typography.descriptionSize);
-      currentDescY += theme.dimensions.lineSpacing;
+      currentDescY += this.cvPage.getScaledSpacing(theme.dimensions.lineSpacing);
     }
 
     return currentDescY; // Fin de la description (headerSpacing sera ajouté après)
@@ -265,14 +266,14 @@ class CvPageRenderers {
 
   renderExperiences(x, startY, width) {
     let y = this.renderSectionTitle("Expérience professionnelle", x, startY, width);
-    y += 40; // Espacement uniforme titre → contenu
-    y += 16; // Offset supplémentaire pour compenser BASELINE des expériences
+    y += this.cvPage.getScaledSpacing(40); // Espacement uniforme titre → contenu
+    y += this.cvPage.getScaledSpacing(16); // Offset supplémentaire pour compenser BASELINE des expériences
 
     const experiences = this.cvPage.content.experiences;
     for (let i = 0; i < experiences.length; i++) {
       y = this.renderExperienceItem(experiences[i], x, y, width);
       if (i < experiences.length - 1) { // Ne pas ajouter d'espace après la dernière
-        y += 40;
+        y += this.cvPage.getScaledSpacing(40);
       }
     }
 
@@ -281,20 +282,20 @@ class CvPageRenderers {
 
   renderSkills(x, startY, width) {
     let y = this.renderSectionTitle("Compétences", x, startY, width);
-    y += 30; // Espacement réduit titre → contenu
+    y += this.cvPage.getScaledSpacing(30); // Espacement réduit titre → contenu
     y = this.renderSkillsGrid(x, y, width);
     return y;
   }
 
   renderEducation(x, startY, width) {
     let y = this.renderSectionTitle("Formation", x, startY, width);
-    y += 40; // Espacement uniforme titre → contenu
+    y += this.cvPage.getScaledSpacing(40); // Espacement uniforme titre → contenu
 
     const educations = this.cvPage.content.education;
     for (let i = 0; i < educations.length; i++) {
       y = this.renderEducationItem(educations[i], x, y, width);
       if (i < educations.length - 1) { // Ne pas ajouter d'espace après la dernière
-        y += 40;
+        y += this.cvPage.getScaledSpacing(40);
       }
     }
 
@@ -303,7 +304,7 @@ class CvPageRenderers {
 
   renderInterests(x, startY, width) {
     let y = this.renderSectionTitle("Centres d'intérêt", x, startY, width);
-    y += 30; // Espacement réduit titre → contenu
+    y += this.cvPage.getScaledSpacing(30); // Espacement réduit titre → contenu
     y = this.renderInterestsGrid(x, y, width);
     return y;
   }
@@ -315,6 +316,7 @@ class CvPageRenderers {
     graphic.textAlign(graphic.LEFT, graphic.BASELINE);
     this.cvPage.applyColor(this.cvPage.theme.colors.textMedium);
 
+    const scaledSize = this.cvPage.getScaledSize(size);
     let currentX = x;
 
     for (const segment of task) {
@@ -322,9 +324,9 @@ class CvPageRenderers {
 
       // Appliquer le style bold directement sur le context
       if (segment.bold) {
-        graphic.drawingContext.font = `bold ${size}px "Segoe UI", sans-serif`;
+        graphic.drawingContext.font = `bold ${scaledSize}px "Segoe UI", sans-serif`;
       } else {
-        graphic.drawingContext.font = `${size}px "Segoe UI", sans-serif`;
+        graphic.drawingContext.font = `${scaledSize}px "Segoe UI", sans-serif`;
       }
 
       graphic.drawingContext.textAlign = 'left';
@@ -361,7 +363,7 @@ class CvPageRenderers {
     const theme = this.cvPage.theme;
 
     // Calculate the height of this experience item to size the side bar appropriately
-    const itemHeight = 30 + (experience.tasks.length * 25);
+    const itemHeight = this.cvPage.getScaledSpacing(30) + (experience.tasks.length * this.cvPage.getScaledSpacing(25));
 
     // Side bar avec shadow néomorphique - aligned with content (ajusté pour BASELINE)
     const barY = y - theme.typography.experienceMetaSize + 4; // Remonter pour aligner avec le haut du texte
@@ -373,11 +375,11 @@ class CvPageRenderers {
 
     // Period and duration - offset to accommodate bar
     this.cvPage.setTextStyle(theme.typography.experienceMetaSize, theme.colors.accent);
-    this.renderTextWithGlitch(experience.period, x + 16, y, theme.typography.experienceMetaSize);
+    this.renderTextWithGlitch(experience.period, x + this.cvPage.getScaledSpacing(16), y, theme.typography.experienceMetaSize);
 
-    graphic.textSize(12);
+    graphic.textSize(this.cvPage.getScaledSize(12));
     this.cvPage.applyColor([...theme.colors.accent, 180]);
-    this.renderTextWithGlitch(experience.duration, x + 16, y + 20, 12);
+    this.renderTextWithGlitch(experience.duration, x + this.cvPage.getScaledSpacing(16), y + this.cvPage.getScaledSpacing(20), 12);
 
     // Title - shifted right
     this.cvPage.setTextStyle(theme.typography.experienceTitleSize, theme.colors.textPrimary);
@@ -390,10 +392,10 @@ class CvPageRenderers {
 
     // Tasks - shifted right avec technologies en gras
     this.cvPage.setTextStyle(theme.typography.experienceTaskSize, theme.colors.textMedium, graphic.LEFT);
-    let taskY = y + 30;
+    let taskY = y + this.cvPage.getScaledSpacing(30);
     for (const task of experience.tasks) {
       this.renderTaskWithBoldTech(task, x + this.cvPage.LAYOUT_CONSTANTS.TASK_OFFSET, taskY, theme.typography.experienceTaskSize);
-      taskY += 25; // Plus d'interligne entre les tâches
+      taskY += this.cvPage.getScaledSpacing(25); // Plus d'interligne entre les tâches
     }
 
     return taskY; // Remove extra spacing
@@ -415,11 +417,11 @@ class CvPageRenderers {
     this.renderTextWithGlitch(education.institution, x + width, y, theme.typography.experienceMetaSize);
 
     // Detail if present (même x que le titre)
-    let entryHeight = 30;
+    let entryHeight = this.cvPage.getScaledSpacing(30);
     if (education.detail) {
       this.cvPage.setTextStyle(theme.typography.experienceTaskSize, theme.colors.textMedium, graphic.LEFT);
-      this.renderTextWithGlitch(education.detail, x + this.cvPage.LAYOUT_CONSTANTS.EDUCATION_TITLE_OFFSET, y + 25, theme.typography.experienceTaskSize);
-      entryHeight = 50;
+      this.renderTextWithGlitch(education.detail, x + this.cvPage.LAYOUT_CONSTANTS.EDUCATION_TITLE_OFFSET, y + this.cvPage.getScaledSpacing(25), theme.typography.experienceTaskSize);
+      entryHeight = this.cvPage.getScaledSpacing(50);
     }
 
     return y + entryHeight;
@@ -435,19 +437,22 @@ class CvPageRenderers {
 
   renderTagGrid(groups, x, y, width, withShadow = false) {
     for (const group of groups) {
-      // Tags - position initiale
-      let tagX = x + this.cvPage.LAYOUT_CONSTANTS.TAG_OFFSET;
+      // Tags - position initiale avec offset légèrement augmenté pour le PDF
+      const tagOffsetScale = this.cvPage.isPdfExport ? 1.2 : 1.0; // Seulement +20% au lieu de +50%
+      const scaledTagOffset = this.cvPage.LAYOUT_CONSTANTS.TAG_OFFSET * tagOffsetScale;
+      let tagX = x + scaledTagOffset;
       let tagY = y;
       let lastTagY = tagY; // Tracker pour la dernière ligne de tags
 
-      // Category - centrée verticalement avec les tags (hauteur 26px)
-      const tagHeight = this.cvPage.LAYOUT_CONSTANTS.TAG_HEIGHT; // 26px
-      const categoryY = y + tagHeight / 2 + 4; // Centrer visuellement (baseline + offset)
+      // Category - centrée verticalement avec les tags
+      const tagHeight = this.cvPage.LAYOUT_CONSTANTS.TAG_HEIGHT;
+      const baselineOffset = this.cvPage.isPdfExport ? 6 : 4; // Ajuster offset pour PDF
+      const categoryY = y + tagHeight / 2 + baselineOffset; // Centrer visuellement (baseline + offset)
       this.cvPage.setTextStyle(14, this.cvPage.theme.colors.textSecondary);
       this.renderTextWithGlitch(group.category.toUpperCase(), x, categoryY, 14);
 
       for (const item of group.items) {
-        // Calculate exact text width with consistent font size
+        // Calculate exact text width with consistent font size (déjà scalé par setTextStyle)
         this.cvPage.setTextStyle(14, this.cvPage.theme.colors.textMedium);
         const textWidth = graphic.textWidth(item);
         const tagWidth = textWidth + this.cvPage.LAYOUT_CONSTANTS.TAG_PADDING;
@@ -455,7 +460,7 @@ class CvPageRenderers {
 
         // Check if tag fits on current line BEFORE drawing
         if (tagX + tagWidth > x + width) {
-          tagX = x + this.cvPage.LAYOUT_CONSTANTS.TAG_OFFSET;
+          tagX = x + scaledTagOffset;
           tagY += this.cvPage.LAYOUT_CONSTANTS.TAG_LINE_SPACING;
         }
 
