@@ -4,6 +4,10 @@ let activePage = null;
 let pages = new Map();
 let graphic = null;
 let backgroundGraphic = null;
+let fps = 0;
+let fpsHistory = [];
+let fpsUpdateInterval = 10; // Mettre à jour le FPS toutes les 15 frames
+let frameCounter = 0;
 
 // Système global de fonts
 let fonts = {};
@@ -21,6 +25,9 @@ function preload() {
   fonts.ninjargon = loadFont('ressources/fonts/rune/Ninjargon-Regular.otf');
   fonts.nyctographic = loadFont('ressources/fonts/rune/Nyctographic.otf');
   fonts.graceOfEtro = loadFont('ressources/fonts/rune/grace_of_etro.ttf');
+  fonts.pokpix1 = loadFont('ressources/fonts/fun/fun/POKPIX1.TTF');
+  fonts.pokpix2 = loadFont('ressources/fonts/fun/fun/POKPIX2.TTF');
+  fonts.pokpix3 = loadFont('ressources/fonts/fun/fun/POKPIX3.TTF');
 
   shockwave = new Shockwave();
 }
@@ -42,21 +49,46 @@ function setup() {
   // Initialiser objects pages
   pages.set('mainPage', new MainPage());
   pages.set('cvPage', new CvPageP5());
-  // pages.set('shaderland', new ShaderLand());
+  pages.set('shaderland', new ShaderLand());
 
   // Démarrer sur mainPage
   activePage = pages.get('mainPage');
-  //activePage.appear();
+  activePage.appear();
 }
 
 function draw() {
   translate(-width/2, -height/2);
   background(244, 243, 241);
   clear();
+  graphic.clear();
   graphic.background(244, 243, 241);
   activePage.render();
   herald.render();
+  renderFPS();
   shockwave.render();
+}
+
+function renderFPS() {
+  frameCounter++;
+
+  // Mettre à jour le FPS toutes les N frames
+  if (frameCounter >= fpsUpdateInterval) {
+    fpsHistory.push(frameRate());
+    if (fpsHistory.length > 5) {
+      fpsHistory.shift();
+    }
+    // Moyenne des dernières valeurs
+    let avgFps = fpsHistory.reduce((a, b) => a + b, 0) / fpsHistory.length;
+    fps = Math.round(avgFps);
+    frameCounter = 0;
+  }
+
+  // Afficher FPS en bas à droite sur graphic (avant le shader)
+  graphic.textFont(fonts.courier);
+  graphic.textSize(18);
+  graphic.fill(80, 80, 80);
+  graphic.textAlign(graphic.RIGHT, graphic.BASELINE);
+  graphic.text(`FPS: ${fps}`, width - 50, height - 45);
 }
 
 async function switchTo(pageName) {
