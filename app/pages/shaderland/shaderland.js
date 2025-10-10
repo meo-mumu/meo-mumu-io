@@ -4,23 +4,44 @@ class ShaderLand {
     this.colors = this._generate_color_palette();
 
     // perlin grid parameters
-    this.scl = 40;
-    this.inc_x = 0.03;
-    this.inc_y = 0.03;
+    this.grid_scale = 50;
+    this.inc_x = 0.01;
+    this.inc_y = 0.01;
     this.inc_z = 0.005;
-    this.rotation_globale = 0;
+    this.global_rotation = 0;
     this.rotation_pokemon = 0;
-    this.size_amplitude = 10;
     this.perlin_grid = [];
     this.zoff = 0;
 
-    // pokemon data
-    this.pokemons = [];
-    this.num_pokemons = 186;
+    // creatures data
+    this.creatureType = CreatureType.PARTICLE;
+    this.creatures = [];
+    this.num_creatures = Particle.getCreatureSettings().defaultCount;
     this.frot_factor = 0.1;
     this.separation_force = 20;
-    this.displayMultiplier = 2; // Afficher chaque pokemon N fois
-    this._build_pokemons();
+    this.speed = 1;
+    this.size = Particle.getCreatureSettings().defaultSize;
+    this.size_amplitude = 0;
+    this._build_creatures();
+
+    // clear screen
+    this.clearScreen = false;
+
+    // background mode
+    this.backgroundMode = 'light'; // 'light' ou 'dark'
+
+    // wave repel
+    this.waveRepelRadius = 150;
+    this.wave_repel_force = 10;
+    this.prevMouseX = mouseX;
+    this.prevMouseY = mouseY;
+
+    // color control
+    this.colorMode = 'static'; // 'static', 'rainbow', 'psychedelic'
+    this.colorSpeed = 1;
+    this.colorSaturation = 100;
+    this.colorBrightness = 100;
+    this.hueShift = 0;
 
     // grille spatiale pour optimisation
     this.spatial_grid = {};
@@ -35,52 +56,42 @@ class ShaderLand {
     // time
     this.time = 0;
 
-    // tweakpane
-    this.pane = new Tweakpane.Pane();
-    this.pane.element.style.display = 'none'; // caché par défaut
-    this._create_pane();
+    // controls (tweakpane)
+    this.controls = new ShaderLandControls(this);
   }
 
   _generate_color_palette() {
-    let palette = [];
-    let num_colors = 100;
-
-    for (let i = 0; i < num_colors; i++) {
-      let t = i / num_colors;
-      // gradient bleu foncé -> cyan -> vert clair (salinity style)
-      let r = Math.floor(lerp(20, 150, t));
-      let g = Math.floor(lerp(50, 220, t));
-      let b = Math.floor(lerp(100, 180, t));
-      palette.push({ r, g, b });
-    }
+    // Palette basée sur les BPM colors du projet soundscape
+    let palette = [
+      { r: 204, g: 255, b: 255 },  // #ccffff - cyan clair
+      { r: 153, g: 255, b: 204 },  // #99ffcc - vert menthe
+      { r: 255, g: 204, b: 204 },  // #ffcccc - rose clair
+      { r: 204, g: 153, b: 255 },  // #cc99ff - violet clair
+      { r: 102, g: 102, b: 255 },  // #6666ff - bleu vif
+      { r: 51, g: 51, b: 153 }     // #333399 - bleu foncé
+    ];
 
     return palette;
   }
 
-  _build_pokemons() {
-    const pokemon_fonts = [fonts.pokpix1, fonts.pokpix2, fonts.pokpix3];
-
-    const excluded_codes = [44, 45, 46, 47];
-    for (let i = 33; i <= 43; i++) excluded_codes.push(i);
-    for (let i = 58; i <= 64; i++) excluded_codes.push(i);
-    for (let i = 91; i <= 96; i++) excluded_codes.push(i);
-    for (let i = 123; i <= 126; i++) excluded_codes.push(i);
-
-    for (let font of pokemon_fonts) {
-      for (let char_code = 33; char_code <= 126; char_code++) {
-        if (!excluded_codes.includes(char_code)) {
-          let random_color = random(this.colors);
-          let pokemon = new Pokemon(
-            String.fromCharCode(char_code),
-            font,
-            width,
-            height,
-            this.frot_factor,
-            random_color
-          );
-          this.pokemons.push(pokemon);
-        }
-      }
+  _build_creatures() {
+    if (this.creatureType === CreatureType.POKEMON) {
+      this.creatures = Pokemon.createMany(
+        this.num_creatures,
+        width,
+        height,
+        this.frot_factor,
+        this.colors,
+        fonts
+      );
+    } else if (this.creatureType === CreatureType.PARTICLE) {
+      this.creatures = Particle.createMany(
+        this.num_creatures,
+        width,
+        height,
+        this.frot_factor,
+        this.colors
+      );
     }
   }
 
@@ -88,22 +99,22 @@ class ShaderLand {
     this.spatial_grid = {};
     const cell_size = this.spatial_cell_size;
 
-    for (let pokemon of this.pokemons) {
-      const cell_x = Math.floor(pokemon.x / cell_size);
-      const cell_y = Math.floor(pokemon.y / cell_size);
+    for (let creature of this.creatures) {
+      const cell_x = Math.floor(creature.x / cell_size);
+      const cell_y = Math.floor(creature.y / cell_size);
       const key = `${cell_x},${cell_y}`;
 
       if (!this.spatial_grid[key]) {
         this.spatial_grid[key] = [];
       }
-      this.spatial_grid[key].push(pokemon);
+      this.spatial_grid[key].push(creature);
     }
   }
 
-  _get_nearby_pokemons(pokemon) {
+  _get_nearby_creatures(creature) {
     const cell_size = this.spatial_cell_size;
-    const cell_x = Math.floor(pokemon.x / cell_size);
-    const cell_y = Math.floor(pokemon.y / cell_size);
+    const cell_x = Math.floor(creature.x / cell_size);
+    const cell_y = Math.floor(creature.y / cell_size);
 
     // réutiliser array pool
     this.nearby_pool.length = 0;
@@ -123,6 +134,75 @@ class ShaderLand {
     return this.nearby_pool;
   }
 
+  _applyWaveRepel(creature) {
+    // Calculate distance between creature and mouse
+    const dx = creature.x - mouseX;
+    const dy = creature.y - mouseY;
+    const distSq = dx * dx + dy * dy;
+    const radiusSq = this.waveRepelRadius * this.waveRepelRadius;
+
+    // If creature is within repel radius
+    if (distSq < radiusSq && distSq > 0) {
+      const dist = Math.sqrt(distSq);
+
+      // Calculate mouse speed (reduced influence with sqrt)
+      const mouseDx = mouseX - this.prevMouseX;
+      const mouseDy = mouseY - this.prevMouseY;
+      const mouseSpeed = Math.sqrt(Math.sqrt(mouseDx * mouseDx + mouseDy * mouseDy));
+
+      // Force based on normalized distance and attenuated speed
+      const distFactor = 1 - dist / this.waveRepelRadius;
+      const force = this.wave_repel_force * distFactor * mouseSpeed * 0.1;
+
+      // Normalized direction
+      const nx = dx / dist;
+      const ny = dy / dist;
+
+      // Apply force in opposite direction from mouse
+      creature.ax += nx * force;
+      creature.ay += ny * force;
+    }
+  }
+
+  _getCreatureColor(creature, index) {
+    if (this.colorMode === 'static') {
+      // Couleur d'origine avec hue shift
+      const baseColor = creature.color;
+      if (this.hueShift === 0 && this.colorSaturation === 100 && this.colorBrightness === 100) {
+        return baseColor;
+      }
+      // Convert RGB to HSB, apply shifts, convert back
+      colorMode(HSB);
+      let c = color(baseColor.r, baseColor.g, baseColor.b);
+      let h = (hue(c) + this.hueShift) % 360;
+      let s = saturation(c) * (this.colorSaturation / 100);
+      let b = brightness(c) * (this.colorBrightness / 100);
+      let newColor = color(h, s, b);
+      colorMode(RGB);
+      return { r: red(newColor), g: green(newColor), b: blue(newColor) };
+    } else if (this.colorMode === 'rainbow') {
+      // Arc-en-ciel basé sur l'index et le temps
+      colorMode(HSB);
+      let hue = (index * 10 + this.time * this.colorSpeed * 50) % 360;
+      let s = this.colorSaturation;
+      let b = this.colorBrightness;
+      let c = color(hue, s, b);
+      colorMode(RGB);
+      return { r: red(c), g: green(c), b: blue(c) };
+    } else if (this.colorMode === 'psychedelic') {
+      // Psychédélique basé sur position + temps + perlin noise
+      colorMode(HSB);
+      let noiseVal = noise(creature.x * 0.005, creature.y * 0.005, this.time * this.colorSpeed * 0.5);
+      let hue = (noiseVal * 360 + this.time * this.colorSpeed * 100 + this.hueShift) % 360;
+      let s = this.colorSaturation;
+      let b = this.colorBrightness;
+      let c = color(hue, s, b);
+      colorMode(RGB);
+      return { r: red(c), g: green(c), b: blue(c) };
+    }
+    return creature.color;
+  }
+
   init_perlin_grid(cols, rows) {
     let yoff = 0;
     for (let y = 0; y < rows; y++) {
@@ -131,7 +211,7 @@ class ShaderLand {
         // normaliser noise de [0,1] vers [-1,1] comme dans l'exemple
         let n = noise(xoff, yoff, this.zoff) * 2 - 1;
         // create a vector from noise avec rotation globale
-        const angle = n * Math.PI + this.rotation_globale;
+        const angle = n * Math.PI + this.global_rotation;
         let v = { x: Math.cos(angle), y: Math.sin(angle) };
         // save vector in perlin_grid
         if (!this.perlin_grid[x]) {
@@ -145,36 +225,19 @@ class ShaderLand {
     this.zoff += this.inc_z;
   }
 
-  _create_pane() {
-    this.pane.addMonitor(this, 'fps', { label: 'FPS' });
-
-    let displayFolder = this.pane.addFolder({ title: 'Display' });
-    displayFolder.addInput(this, 'displayMultiplier', { min: 1, max: 10, step: 1, label: 'pokemon multiplier' });
-
-    let folder = this.pane.addFolder({ title: 'Perlin Flow' });
-    folder.addInput(this, 'scl', { min: 10, max: 100, step: 1 });
-    folder.addInput(this, 'frot_factor', { min: 0.01, max: 1, label: 'frottement' });
-    folder.addInput(this, 'separation_force', { min: 0, max: 100, step: 2, label: 'séparation' });
-    folder.addInput(this, 'rotation_globale', { min: 0, max: Math.PI * 2, step: 0.01, label: 'rotation globale' });
-    folder.addInput(this, 'rotation_pokemon', { min: 0, max: 10, step: 0.1, label: 'rotation pokemon' });
-    folder.addInput(this, 'size_amplitude', { min: 0, max: 20, step: 1, label: 'size amplitude' });
-    folder.addInput(this, 'inc_x', { min: 0.01, max: 0.5 });
-    folder.addInput(this, 'inc_y', { min: 0.01, max: 0.5 });
-    folder.addInput(this, 'inc_z', { min: 0.001, max: 0.01 });
-  }
-
   async appear() {
     console.log('Shaderland appear');
-    if (this.pane) {
-      this.pane.element.style.display = 'block';
-    }
+    // Initialiser le background au démarrage
+    const bgColor = this.backgroundMode === 'light'
+      ? [244, 243, 241]
+      : [0, 0, 0];
+    graphic.background(...bgColor);
+    this.controls.show();
   }
 
   async hide() {
     console.log('Shaderland hide');
-    if (this.pane) {
-      this.pane.element.style.display = 'none';
-    }
+    this.controls.hide();
   }
 
   render() {
@@ -184,60 +247,69 @@ class ShaderLand {
     // increment time
     this.time += 0.01;
 
-    // graphic.clear();
-    // graphic.background(244, 243, 241);
+    // Clear ou pas (simple)
+    if (this.clearScreen) {
+      graphic.clear();
+      const bgColor = this.backgroundMode === 'light'
+        ? [244, 243, 241]
+        : [0, 0, 0];
+      graphic.background(...bgColor);
+    }
 
     // init perlin grid
-    const scl = this.scl;
+    const scl = this.grid_scale;
     const cols = Math.floor(width / scl);
     const rows = Math.floor(height / scl);
     this.init_perlin_grid(cols, rows);
 
     // cache variables
-    const rotation_pokemon = this.rotation_pokemon;
+    const rotation_speed = this.rotation_pokemon;
     const time = this.time;
+    const speed = this.speed;
+    const size = this.size;
     const size_amplitude = this.size_amplitude;
     const separation_force = this.separation_force;
     const perlin_grid = this.perlin_grid;
-    const pokemons = this.pokemons;
-    const pokemons_length = pokemons.length;
+    const creatures = this.creatures;
+    const creatures_length = creatures.length;
 
-    // update pokemons
+    // update creatures (polymorphisme)
     if (separation_force > 0) {
-      // avec séparation - construire grille spatiale
       this._build_spatial_grid();
-      for (let i = 0; i < pokemons_length; i++) {
-        let pokemon = pokemons[i];
-        pokemon.follow(perlin_grid, scl, cols, rows);
-        let nearby = this._get_nearby_pokemons(pokemon);
-        pokemon.update(rotation_pokemon, time, size_amplitude, nearby, separation_force);
-      }
-    } else {
-      // sans séparation - skip grille spatiale
-      for (let i = 0; i < pokemons_length; i++) {
-        let pokemon = pokemons[i];
-        pokemon.follow(perlin_grid, scl, cols, rows);
-        pokemon.update(rotation_pokemon, time, size_amplitude, [], 0);
-      }
     }
 
-    // draw pokemons - regrouper par font + frustum culling + multiplier
-    graphic.textAlign(graphic.CENTER, graphic.CENTER);
-    graphic.noStroke();
-    const screen_margin = 100;
-    const displayMultiplier = Math.floor(this.displayMultiplier);
+    for (let i = 0; i < creatures_length; i++) {
+      let creature = creatures[i];
+      creature.follow(perlin_grid, scl, cols, rows);
 
-    for (let font_key of ['pokpix1', 'pokpix2', 'pokpix3']) {
-      const current_font = fonts[font_key];
-      graphic.textFont(current_font);
-      for (let i = 0; i < pokemons_length; i++) {
-        let pokemon = pokemons[i];
-        if (pokemon.font === current_font && pokemon.is_on_screen(screen_margin)) {
-          // Afficher le pokemon plusieurs fois avec offset
-          for (let m = 0; m < displayMultiplier; m++) {
-            pokemon.draw_pokemon_optimized();
-          }
-        }
+      // Wave repel (enabled when force > 0)
+      if (this.wave_repel_force > 0) {
+        this._applyWaveRepel(creature);
+      }
+
+      // Pass nearby and separation_force to all creatures
+      // Creatures that don't need them will ignore them
+      let nearby = separation_force > 0 ? this._get_nearby_creatures(creature) : [];
+      creature.update(rotation_speed, time, size, size_amplitude, nearby, separation_force, speed);
+    }
+
+    // Update previous mouse position
+    this.prevMouseX = mouseX;
+    this.prevMouseY = mouseY;
+
+    // draw creatures (polymorphisme pur)
+    graphic.noStroke();
+    graphic.textAlign(graphic.CENTER, graphic.CENTER);
+    const screen_margin = 100;
+
+    for (let i = 0; i < creatures_length; i++) {
+      let creature = creatures[i];
+      if (creature.is_on_screen(screen_margin)) {
+        // Appliquer la couleur dynamique
+        const originalColor = creature.color;
+        creature.color = this._getCreatureColor(creature, i);
+        creature.draw(); // Polymorphisme
+        creature.color = originalColor; // Restaurer la couleur d'origine
       }
     }
   }

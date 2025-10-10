@@ -44,6 +44,9 @@ class MainPage {
   }
 
   render() {
+    graphic.clear();
+    graphic.background(244, 243, 241);
+    // render all mysterious texts
     for (let mysText of this.mysteriousTexts) { mysText.render();}
   }
 

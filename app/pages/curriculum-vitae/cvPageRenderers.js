@@ -67,6 +67,8 @@ class CvPageRenderers {
   // === CORE RENDERING ===
 
   render() {
+    graphic.clear();
+    
     this.clearAndSetBackground();
     this.updateScrollPosition();
 

@@ -1,60 +1,71 @@
-class Pokemon {
-  constructor(char, font, width, height, frot_factor, color) {
-    this.char = char;
-    this.font = font;
-    this.width = width;
-    this.height = height;
-
-    // aspect
-    this.base_radius = random(15, 30);
-    this.radius = this.base_radius;
-    this.color = color;
-    this.rotation = 0;
-
-    // perlin offset pour la taille et rotation
-    this.noise_offset_size = random(1000);
-    this.noise_offset_rotation = random(1000);
-
-    // position
-    this.x = random(0, width);
-    this.y = random(0, height);
-
-    // acceleration
-    this.ax = 0;
-    this.ay = 0;
-
-    // velocity
-    this.vx = 0;
-    this.vy = 0;
-
-    // frottement
-    this.frot_factor = 1 - frot_factor;
+class Pokemon extends Creatures {
+  // Pokemon-specific count settings
+  static getCreatureSettings() {
+    return {
+      defaultCount: 100,
+      countMin: 0,
+      countMax: 150,
+      countStep: 10,
+      defaultSize: 2
+    };
   }
 
-  apply_border_force() {
-    const border_margin = 100; // distance depuis le bord où la force commence
-    const force_strength = 0.5; // intensité de la force
+  // Pokemon-specific UI controls configuration
+  static getControlsConfig() {
+    const baseConfig = super.getControlsConfig();
+    return {
+      creatures: {
+        ...baseConfig.creatures,
+        size: { min: 1, max: 3, step: 0.1, label: 'size' },
+        separation_force: { min: 0, max: 100, step: 2, label: 'repel force' },
+        rotation_pokemon: { min: 0, max: 10, step: 0.1, label: 'rotation speed' }
+      }
+    };
+  }
 
-    // force depuis le bord gauche
-    if (this.x < border_margin) {
-      let force = map(this.x, 0, border_margin, force_strength, 0);
-      this.ax += force;
+  constructor(char, font, width, height, frot_factor, color) {
+    // Call parent constructor with random base_radius for Pokemon
+    super(width, height, frot_factor, color, random(15, 30));
+
+    // Pokemon-specific properties
+    this.char = char;
+    this.font = font;
+
+    // Pokemon keeps its own offset for more variety
+    this.noise_offset_rotation = random(1000);
+  }
+
+  static createMany(num_objects, width, height, frot_factor, colors, fonts) {
+    const pokemon_fonts = [fonts.pokpix1, fonts.pokpix2, fonts.pokpix3];
+    const pokemons = [];
+
+    const excluded_codes = [44, 45, 46, 47];
+    for (let i = 33; i <= 43; i++) excluded_codes.push(i);
+    for (let i = 58; i <= 64; i++) excluded_codes.push(i);
+    for (let i = 91; i <= 96; i++) excluded_codes.push(i);
+    for (let i = 123; i <= 126; i++) excluded_codes.push(i);
+
+    let count = 0;
+    for (let font of pokemon_fonts) {
+      for (let char_code = 33; char_code <= 126; char_code++) {
+        if (!excluded_codes.includes(char_code) && count < num_objects) {
+          let random_color = random(colors);
+          let pokemon = new Pokemon(
+            String.fromCharCode(char_code),
+            font,
+            width,
+            height,
+            frot_factor,
+            random_color
+          );
+          pokemons.push(pokemon);
+          count++;
+        }
+      }
+      if (count >= num_objects) break;
     }
-    // force depuis le bord droit
-    if (this.x > width - border_margin) {
-      let force = map(this.x, width - border_margin, width, 0, force_strength);
-      this.ax -= force;
-    }
-    // force depuis le bord haut
-    if (this.y < border_margin) {
-      let force = map(this.y, 0, border_margin, force_strength, 0);
-      this.ay += force;
-    }
-    // force depuis le bord bas
-    if (this.y > height - border_margin) {
-      let force = map(this.y, height - border_margin, height, 0, force_strength);
-      this.ay -= force;
-    }
+
+    return pokemons;
   }
 
   separate(nearby_pokemons, separation_force) {
@@ -95,96 +106,42 @@ class Pokemon {
     }
   }
 
-  edge() {
-    // wrapping en cas de dépassement extrême
-    const margin = 50;
-    if (this.x > width + margin) {
-      this.x = -margin;
-    } else if (this.x < -margin) {
-      this.x = width + margin;
+  update(rotation_speed, time, size, size_amplitude, nearby = [], separation_force = 0, speed = 1) {
+    // Apply separation before the rest (Pokemon-specific behavior)
+    if (separation_force > 0 && nearby.length > 0) {
+      this.separate(nearby, separation_force);
     }
 
-    if (this.y > height + margin) {
-      this.y = -margin;
-    } else if (this.y < -margin) {
-      this.y = height + margin;
-    }
-  }
-
-  follow(perlin_grid, scl, cols, rows) {
-    let x = Math.floor(this.x / scl);
-    let y = Math.floor(this.y / scl);
-
-    // clamp manuel plus rapide que constrain()
-    if (x < 0) x = 0;
-    else if (x >= cols) x = cols - 1;
-
-    if (y < 0) y = 0;
-    else if (y >= rows) y = rows - 1;
-
-    // accès direct au vecteur (plus besoin de vérifier existence avec clamp)
-    const force = perlin_grid[x][y];
-    this.ax = force.x;
-    this.ay = force.y;
-  }
-
-  update(rotation_speed, time, size_amplitude, pokemons, separation_force) {
-    // séparation entre pokemon (skip si force = 0)
-    if (separation_force > 0) {
-      this.separate(pokemons, separation_force);
-    }
-
-    // appliquer force de bordure avant de calculer la vélocité
+    // Call parent version for the rest of the behavior
+    // Note: we use this.noise_offset_rotation instead of this.noise_offset
+    // so we override just this part
     this.apply_border_force();
 
     this.vx += this.ax;
     this.vy += this.ay;
-    this.x += this.vx;
-    this.y += this.vy;
+    this.x += this.vx * speed;
+    this.y += this.vy * speed;
     this.vx *= this.frot_factor;
     this.vy *= this.frot_factor;
     this.ax = 0;
     this.ay = 0;
 
-    // wrapping
     this.edge();
 
-    // une seule valeur de noise pour rotation ET taille (optimisation)
+    // Pokemon uses its own noise_offset for more variety
     let noiseValue = noise(this.noise_offset_rotation + time * 0.4);
-
-    // rotation basée sur le noise
     this.rotation = (noiseValue - 0.5) * rotation_speed * Math.PI * 2;
-
-    // variation de taille basée sur la même valeur (légèrement décalée)
     let size_variation = (noiseValue * 0.8 - 0.4) * size_amplitude;
-    this.radius = this.base_radius * (1 + size_variation);
-    // sécurité : taille minimale
+    this.radius = this.base_radius * size * (1 + size_variation);
     this.radius = max(this.radius, 5);
   }
 
-  draw_pokemon() {
+  draw() {
     graphic.push();
     graphic.translate(this.x, this.y);
     graphic.rotate(this.rotation);
     graphic.fill(this.color.r, this.color.g, this.color.b, 200);
-    graphic.noStroke();
     graphic.textFont(this.font);
-    graphic.textSize(this.radius);
-    graphic.textAlign(graphic.CENTER, graphic.CENTER);
-    graphic.text(this.char, 0, 0);
-    graphic.pop();
-  }
-
-  is_on_screen(margin) {
-    return this.x > -margin && this.x < width + margin &&
-           this.y > -margin && this.y < height + margin;
-  }
-
-  draw_pokemon_optimized() {
-    graphic.push();
-    graphic.translate(this.x, this.y);
-    graphic.rotate(this.rotation);
-    graphic.fill(this.color.r, this.color.g, this.color.b, 200);
     graphic.textSize(this.radius);
     graphic.text(this.char, 0, 0);
     graphic.pop();

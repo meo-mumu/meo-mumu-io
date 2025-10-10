@@ -29,7 +29,7 @@ class Herald {
     this.minDisplayTime = 0;
 
     // visual configuration
-    this.textSize = 18;
+    this.textSize = 16;
     this.textColor = { r: 80, g: 80, b: 80 };
 
     // font transformation system
@@ -238,12 +238,8 @@ class Herald {
     const isHovering = this.isHoveringMessage();
     const isClickable = this.currentMessage && this.currentMessage.action;
 
-    // Change color if hovering over clickable message
-    if (isClickable && isHovering) {
-      graphic.fill(this.textColor.r + 40, this.textColor.g + 40, this.textColor.b + 40);
-    } else {
-      graphic.fill(this.textColor.r, this.textColor.g, this.textColor.b);
-    }
+    // Keep text color constant
+    graphic.fill(this.textColor.r, this.textColor.g, this.textColor.b);
 
     graphic.textAlign(graphic.LEFT, graphic.BASELINE);
 
@@ -270,6 +266,14 @@ class Herald {
       width: xOffset,
       height: this.textSize * 1.5
     };
+
+    // Draw underline for clickable messages on hover
+    if (isClickable && isHovering) {
+      graphic.stroke(this.textColor.r, this.textColor.g, this.textColor.b);
+      graphic.strokeWeight(1);
+      graphic.line(this.pos.x, this.pos.y + 7, this.pos.x + xOffset, this.pos.y + 7);
+      graphic.noStroke();
+    }
   }
 
   // ------------------------------------------------------------------- interaction

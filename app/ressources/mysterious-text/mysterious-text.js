@@ -93,7 +93,8 @@ class MysteriousText {
     const startX = this.pos.x - (this.text.length * this.spacing) / 2 + this.spacing / 2;
     const maxDist = Math.min(graphic.width, graphic.height) / 2;
 
-    // textAlign déjà configuré dans initGraphics()
+    // Center text alignment for proper positioning
+    graphic.textAlign(graphic.CENTER, graphic.CENTER);
 
     for (let i = 0; i < this.text.length; i++) {
       const letterX = startX + i * this.spacing;

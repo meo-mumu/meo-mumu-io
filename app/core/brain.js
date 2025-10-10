@@ -37,6 +37,7 @@ function setup() {
   canvas.parent('p5-container');
   background(244, 243, 241);
   graphic = createGraphics(width, height);
+  graphic.background(244, 243, 241);
   graphic.fill(80, 80, 80);
   graphic.noStroke();
 
@@ -54,17 +55,16 @@ function setup() {
   // Démarrer sur mainPage
   activePage = pages.get('mainPage');
   activePage.appear();
+
 }
 
 function draw() {
   translate(-width/2, -height/2);
   background(244, 243, 241);
   clear();
-  graphic.clear();
-  graphic.background(244, 243, 241);
   activePage.render();
   herald.render();
-  renderFPS();
+  //renderFPS();
   shockwave.render();
 }
 
@@ -92,9 +92,9 @@ function renderFPS() {
 }
 
 async function switchTo(pageName) {
-  // await activePage.hide(); // fade graphic -> bg
+  await activePage.hide();
   activePage = pages.get(pageName);
-  await activePage.appear(); // fade bg -> graphic
+  await activePage.appear();
 }
 
 function windowResized() {
