@@ -149,13 +149,14 @@ class Pokemon {
     // wrapping
     this.edge();
 
-    // rotation du pokemon avec perlin
-    let noise_rotation = noise(this.noise_offset_rotation + time * 0.3);
-    this.rotation = (noise_rotation - 0.5) * rotation_speed * Math.PI * 2;
+    // une seule valeur de noise pour rotation ET taille (optimisation)
+    let noiseValue = noise(this.noise_offset_rotation + time * 0.4);
 
-    // variation de taille avec perlin
-    let noise_size = noise(this.noise_offset_size + time * 0.5);
-    let size_variation = (noise_size - 0.5) * size_amplitude;
+    // rotation basée sur le noise
+    this.rotation = (noiseValue - 0.5) * rotation_speed * Math.PI * 2;
+
+    // variation de taille basée sur la même valeur (légèrement décalée)
+    let size_variation = (noiseValue * 0.8 - 0.4) * size_amplitude;
     this.radius = this.base_radius * (1 + size_variation);
     // sécurité : taille minimale
     this.radius = max(this.radius, 5);

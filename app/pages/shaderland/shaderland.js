@@ -4,7 +4,7 @@ class ShaderLand {
     this.colors = this._generate_color_palette();
 
     // perlin grid parameters
-    this.scl = 20;
+    this.scl = 40;
     this.inc_x = 0.03;
     this.inc_y = 0.03;
     this.inc_z = 0.005;
@@ -18,7 +18,8 @@ class ShaderLand {
     this.pokemons = [];
     this.num_pokemons = 186;
     this.frot_factor = 0.1;
-    this.separation_force = 50;
+    this.separation_force = 20;
+    this.displayMultiplier = 2; // Afficher chaque pokemon N fois
     this._build_pokemons();
 
     // grille spatiale pour optimisation
@@ -147,6 +148,9 @@ class ShaderLand {
   _create_pane() {
     this.pane.addMonitor(this, 'fps', { label: 'FPS' });
 
+    let displayFolder = this.pane.addFolder({ title: 'Display' });
+    displayFolder.addInput(this, 'displayMultiplier', { min: 1, max: 10, step: 1, label: 'pokemon multiplier' });
+
     let folder = this.pane.addFolder({ title: 'Perlin Flow' });
     folder.addInput(this, 'scl', { min: 10, max: 100, step: 1 });
     folder.addInput(this, 'frot_factor', { min: 0.01, max: 1, label: 'frottement' });
@@ -217,10 +221,11 @@ class ShaderLand {
       }
     }
 
-    // draw pokemons - regrouper par font + frustum culling
+    // draw pokemons - regrouper par font + frustum culling + multiplier
     graphic.textAlign(graphic.CENTER, graphic.CENTER);
     graphic.noStroke();
     const screen_margin = 100;
+    const displayMultiplier = Math.floor(this.displayMultiplier);
 
     for (let font_key of ['pokpix1', 'pokpix2', 'pokpix3']) {
       const current_font = fonts[font_key];
@@ -228,7 +233,10 @@ class ShaderLand {
       for (let i = 0; i < pokemons_length; i++) {
         let pokemon = pokemons[i];
         if (pokemon.font === current_font && pokemon.is_on_screen(screen_margin)) {
-          pokemon.draw_pokemon_optimized();
+          // Afficher le pokemon plusieurs fois avec offset
+          for (let m = 0; m < displayMultiplier; m++) {
+            pokemon.draw_pokemon_optimized();
+          }
         }
       }
     }
