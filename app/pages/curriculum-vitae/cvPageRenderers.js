@@ -4,59 +4,16 @@
 class CvPageRenderers {
   constructor(cvPage) {
     this.cvPage = cvPage;
-    this.sectionId = 0; // compteur pour identifier les sections
   }
 
-  // -------------------------------------------- glitch text rendering
+  // -------------------------------------------- text rendering
 
-  // render une section de texte avec transformation herald
+  // render une section de texte simple
   renderSectionWithGlitch(text, x, y, size, bold = false) {
-    if (!this.cvPage.emergenceState.isAnimating) {
-      if (bold) {
-        graphic.drawingContext.font = `bold ${size}px "Segoe UI"`;
-      }
-      graphic.text(text, x, y);
-      return;
+    if (bold) {
+      graphic.drawingContext.font = `bold ${this.cvPage.getScaledSize(size)}px "Segoe UI"`;
     }
-
-    const sectionId = this.sectionId++;
-    const typingProgress = this.cvPage.emergenceState.typingProgress;
-
-    // calculer combien de caractères afficher dans cette section
-    const displayedChars = Math.floor(typingProgress * text.length);
-
-    // calculer position de départ selon alignement
-    let startX = x;
-    const currentAlign = graphic.drawingContext.textAlign;
-
-    if (currentAlign === 'right') {
-      this.cvPage.applyFont();
-      graphic.textSize(this.cvPage.getScaledSize(size));
-      const totalWidth = graphic.textWidth(text);
-      startX = x - totalWidth;
-    } else if (currentAlign === 'center') {
-      this.cvPage.applyFont();
-      graphic.textSize(this.cvPage.getScaledSize(size));
-      const totalWidth = graphic.textWidth(text);
-      startX = x - totalWidth / 2;
-    }
-
-    // rendu char par char style herald
-    graphic.textAlign(graphic.LEFT, graphic.BASELINE);
-    let currentX = startX;
-
-    for (let i = 0; i < displayedChars; i++) {
-      const char = text[i];
-      const charId = `section${sectionId}_char${i}`;
-
-      const font = this.cvPage.animator.getGlitchFontForChar(charId, sectionId, i, displayedChars);
-      graphic.textFont(font);
-      graphic.textSize(this.cvPage.getScaledSize(size));
-      graphic.text(char, currentX, y);
-      currentX += graphic.textWidth(char);
-    }
-
-    this.cvPage.applyFont();
+    graphic.text(text, x, y);
   }
 
   // alias pour compatibilité
@@ -93,9 +50,6 @@ class CvPageRenderers {
   }
 
   renderContentWithClipping(layout) {
-    // réinitialiser le compteur de section à chaque frame
-    this.sectionId = 0;
-
     const restoreClipping = this.cvPage.createClippingMask(
       layout.container.x, layout.container.y,
       layout.container.width, layout.container.height

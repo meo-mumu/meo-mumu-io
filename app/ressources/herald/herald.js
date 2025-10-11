@@ -32,6 +32,11 @@ class Herald {
     this.textSize = 16;
     this.textColor = { r: 80, g: 80, b: 80 };
 
+    // underline animation for clickable messages
+    this.underlineProgress = 0;
+    this.isHovered = false;
+    this.hoverStartTime = 0;
+
     // font transformation system
     this.initTransformationFonts();
 
@@ -136,7 +141,33 @@ class Herald {
   update() {
     this.updateTypingAnimation();
     this.updateCharacterTransformations();
+    this.updateUnderlineAnimation();
     this.processMessageQueue();
+  }
+
+  // update underline animation based on hover
+  updateUnderlineAnimation() {
+    const isCurrentlyHovered = this.isHoveringMessage();
+    const isClickable = this.currentMessage && this.currentMessage.action;
+
+    if (isClickable && isCurrentlyHovered && !this.isHovered) {
+      // Start hover
+      this.isHovered = true;
+      this.hoverStartTime = millis();
+    } else if (!isCurrentlyHovered && this.isHovered) {
+      // End hover
+      this.isHovered = false;
+      this.hoverStartTime = 0;
+    }
+
+    // Animate underline progress
+    if (this.isHovered) {
+      let elapsedTime = millis() - this.hoverStartTime;
+      let animationDuration = 200;
+      this.underlineProgress = Math.min(elapsedTime / animationDuration, 1.0);
+    } else {
+      this.underlineProgress = 0;
+    }
   }
 
   // update character-by-character font transformations
@@ -267,11 +298,15 @@ class Herald {
       height: this.textSize * 1.5
     };
 
-    // Draw underline for clickable messages on hover
-    if (isClickable && isHovering) {
+    // Draw progressive underline for clickable messages on hover
+    if (isClickable && this.underlineProgress > 0) {
+      const lineY = this.pos.y + 7;
+      const lineWidth = xOffset;
+      const currentEndX = this.pos.x + (lineWidth * this.underlineProgress);
+
       graphic.stroke(this.textColor.r, this.textColor.g, this.textColor.b);
       graphic.strokeWeight(1);
-      graphic.line(this.pos.x, this.pos.y + 7, this.pos.x + xOffset, this.pos.y + 7);
+      graphic.line(this.pos.x, lineY, currentEndX, lineY);
       graphic.noStroke();
     }
   }

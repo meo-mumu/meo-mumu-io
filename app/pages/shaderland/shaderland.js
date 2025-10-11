@@ -232,6 +232,7 @@ class ShaderLand {
       ? [244, 243, 241]
       : [0, 0, 0];
     graphic.background(...bgColor);
+    shockwave.appearEffect("extended-bubbling");
     this.controls.show();
   }
 

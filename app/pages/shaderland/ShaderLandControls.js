@@ -27,7 +27,7 @@ class ShaderLandControls {
     });
 
     // FPS Monitor
-    this.pane.addMonitor(this.shaderland, 'fps', { label: 'FPS' });
+    // this.pane.addMonitor(this.shaderland, 'fps', { label: 'FPS' });
 
     // Visual folder
     let visualFolder = this.pane.addFolder({ title: 'Visual' });

@@ -29,15 +29,6 @@ class CvPageP5 {
       TAG_LINE_SPACING: 30
     };
 
-    // Animation state for emergence effect (style herald)
-    this.emergenceState = {
-      isAnimating: false,
-      typingProgress: 0,         // progression du typing (0 -> 1)
-      charFontIndices: new Map(), // Map<charId, fontIndex> : index de font par caractère
-      charNoiseOffsets: new Map(), // Map<charId, noiseOffset> : offset perlin noise par caractère
-      shadowIntensity: 0.0
-    };
-
     this.scrollState = {
       current: 0,
       target: 0,
@@ -85,11 +76,10 @@ class CvPageP5 {
   async appear() {
     console.log('CvPageP5 appear');
 
-    // Lancer le shockwave effect et l'animation d'émergence en parallèle
+    // Lancer le shockwave effect
     shockwave.appearEffect("extended-bubbling");
-    this.animator.startEmergenceAnimation();
-    await sleep(5000);
-    herald.addMessage("> Click here to export a PDF version", 3000, () => {
+    await sleep(6000);
+    herald.addMessage("> Click here to export a PDF version", 100, () => {
       this.exporter.exportToPDF();
     });
   }

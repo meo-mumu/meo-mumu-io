@@ -34,8 +34,8 @@ class MainPage {
     console.log('MainPage appear');
     shockwave.appearEffect("central-bubbling");
     await sleep(3000);
-    herald.addMessage("> Hello", 1000);
-    herald.addMessage("> Contact me at leomacias@hotmail.fr", 3000);
+    herald.addMessage(" ", 100);
+    // herald.addMessage("> Contact me at leomacias@hotmail.fr", 3000);
   }
 
   async hide() {

@@ -5,7 +5,7 @@ class Shockwave {
     this.isAppear = false;
     this.isHidding = false;
 
-    this.apparitionDuration = 2000; // Durée totale de l'apparition en ms
+    this.apparitionDuration = 3500; // Durée totale de l'apparition en ms
     this.apparitionTime = 0; // Temps écoulé depuis le début de l'apparition
 
     this.hideDuration = 2000; // Durée totale de la disparition en ms
