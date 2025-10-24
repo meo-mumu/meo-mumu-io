@@ -241,7 +241,9 @@ class CvPageRenderers {
   renderSkills(x, startY, width) {
     let y = this.renderSectionTitle("Compétences", x, startY, width);
     y += this.cvPage.getScaledSpacing(30); // Espacement réduit titre → contenu
-    y = this.renderSkillsGrid(x, y, width);
+    // Calculate uniform offset for both skills and interests
+    const uniformOffset = this.calculateUniformTagOffset();
+    y = this.renderSkillsGrid(x, y, width, uniformOffset);
     return y;
   }
 
@@ -263,11 +265,36 @@ class CvPageRenderers {
   renderInterests(x, startY, width) {
     let y = this.renderSectionTitle("Centres d'intérêt", x, startY, width);
     y += this.cvPage.getScaledSpacing(30); // Espacement réduit titre → contenu
-    y = this.renderInterestsGrid(x, y, width);
+    // Use same uniform offset as skills
+    const uniformOffset = this.calculateUniformTagOffset();
+    y = this.renderInterestsGrid(x, y, width, uniformOffset);
     return y;
   }
 
   // === COMPONENT RENDERERS ===
+
+  calculateUniformTagOffset() {
+    // Find the longest category across both skills and interests
+    this.cvPage.setTextStyle(14, this.cvPage.theme.colors.textSecondary);
+    let maxCategoryWidth = 0;
+
+    // Check all skills categories
+    for (const group of this.cvPage.content.skills) {
+      const categoryWidth = graphic.textWidth(group.category.toUpperCase());
+      maxCategoryWidth = Math.max(maxCategoryWidth, categoryWidth);
+    }
+
+    // Check all interests categories
+    for (const group of this.cvPage.content.interests) {
+      const categoryWidth = graphic.textWidth(group.category.toUpperCase());
+      maxCategoryWidth = Math.max(maxCategoryWidth, categoryWidth);
+    }
+
+    // Calculate uniform offset
+    const baseMargin = 30;
+    const pdfExtraMargin = this.cvPage.isPdfExport ? 20 : 0;
+    return maxCategoryWidth + baseMargin + pdfExtraMargin;
+  }
 
   renderTaskWithBoldTech(task, x, y, size) {
     // task est maintenant un tableau de segments {text, bold}
@@ -385,29 +412,39 @@ class CvPageRenderers {
     return y + entryHeight;
   }
 
-  renderSkillsGrid(x, y, width) {
-    return this.renderTagGrid(this.cvPage.content.skills, x, y, width, false);
+  renderSkillsGrid(x, y, width, uniformOffset) {
+    return this.renderTagGrid(this.cvPage.content.skills, x, y, width, false, uniformOffset);
   }
 
-  renderInterestsGrid(x, y, width) {
-    return this.renderTagGrid(this.cvPage.content.interests, x, y, width, false);
+  renderInterestsGrid(x, y, width, uniformOffset) {
+    return this.renderTagGrid(this.cvPage.content.interests, x, y, width, false, uniformOffset);
   }
 
-  renderTagGrid(groups, x, y, width, withShadow = false) {
+  renderTagGrid(groups, x, y, width, withShadow = false, uniformOffset = null) {
+    // If no uniform offset provided, calculate it for this grid only
+    if (uniformOffset === null) {
+      this.cvPage.setTextStyle(14, this.cvPage.theme.colors.textSecondary);
+      let maxCategoryWidth = 0;
+      for (const group of groups) {
+        const categoryWidth = graphic.textWidth(group.category.toUpperCase());
+        maxCategoryWidth = Math.max(maxCategoryWidth, categoryWidth);
+      }
+      const baseMargin = 30;
+      const pdfExtraMargin = this.cvPage.isPdfExport ? 20 : 0;
+      uniformOffset = maxCategoryWidth + baseMargin + pdfExtraMargin;
+    }
+
     for (const group of groups) {
-      // Tags - position initiale avec offset légèrement augmenté pour le PDF
-      const tagOffsetScale = this.cvPage.isPdfExport ? 1.2 : 1.0; // Seulement +20% au lieu de +50%
-      const scaledTagOffset = this.cvPage.LAYOUT_CONSTANTS.TAG_OFFSET * tagOffsetScale;
-      let tagX = x + scaledTagOffset;
-      let tagY = y;
-      let lastTagY = tagY; // Tracker pour la dernière ligne de tags
-
       // Category - centrée verticalement avec les tags
       const tagHeight = this.cvPage.LAYOUT_CONSTANTS.TAG_HEIGHT;
       const baselineOffset = this.cvPage.isPdfExport ? 6 : 4; // Ajuster offset pour PDF
       const categoryY = y + tagHeight / 2 + baselineOffset; // Centrer visuellement (baseline + offset)
       this.cvPage.setTextStyle(14, this.cvPage.theme.colors.textSecondary);
       this.renderTextWithGlitch(group.category.toUpperCase(), x, categoryY, 14);
+
+      let tagX = x + uniformOffset;
+      let tagY = y;
+      let lastTagY = tagY; // Tracker pour la dernière ligne de tags
 
       for (const item of group.items) {
         // Calculate exact text width with consistent font size (déjà scalé par setTextStyle)
@@ -418,7 +455,7 @@ class CvPageRenderers {
 
         // Check if tag fits on current line BEFORE drawing
         if (tagX + tagWidth > x + width) {
-          tagX = x + scaledTagOffset;
+          tagX = x + uniformOffset;
           tagY += this.cvPage.LAYOUT_CONSTANTS.TAG_LINE_SPACING;
         }
 
