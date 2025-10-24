@@ -1,4 +1,4 @@
-const CV_CONTENT = {
+const CV_CONTENT_FR = {
   personal: {
     name: "Leo Macias",
     jobTitle: "Software / Data Engineer",
@@ -9,8 +9,7 @@ const CV_CONTENT = {
     photoPath: "pages/curriculum-vitae/me-pro.PNG"
   },
 
-  description: "Après 5 ans en data engineering, je me suis tourné vers le freelancing pour combiner expertise technique et explorations artistiques (sound design, art numérique, ..). Je mets ma rigueur et ma capacité d'adaptation au service de projets exigeants et innovants. Je reste aussi ouvert à un poste salarié offrant des perspectives d'évolution.",
-
+  description: "Je suis passionné par les technologies de l'information et le développement logiciel. Après cinq années en data engineering, j’ai choisi le freelancing pour continuer à progresser en autodidacte et élargir mon champ d’action, notamment à travers mes recherches personnelles en sound design et art numérique. Je mets aujourd'hui ma rigueur et ma capacité d'adaptation au service de projets exigeants et innovants",
   experiences: [
     {
       period: "2024-2025",
@@ -19,10 +18,10 @@ const CV_CONTENT = {
       company: "Betclic",
       isFreelance: true,
       tasks: [
-        "Maintien et création de pipelines SQL sous Snowflake",
-        "Orchestration via Talend et Airflow",
-        "Dashboard Tableau et envoi de rapports automatisés",
-        "Data : comportement des joueurs de casino et poker en ligne"
+        [{text: "Maintien et création de pipelines "}, {text: "SQL", bold: true}, {text: " sous "}, {text: "Snowflake", bold: true}],
+        [{text: "Orchestration via "}, {text: "Talend", bold: true}, {text: " et "}, {text: "Airflow", bold: true}],
+        [{text: "Dashboard "}, {text: "Tableau", bold: true}, {text: " et envoi de rapports automatisés"}],
+        [{text: "Data :", bold: true}, {text: " comportement des joueurs de casino et poker en ligne"}]
       ]
     },
     {
@@ -32,9 +31,9 @@ const CV_CONTENT = {
       company: "Mc Ma Solutions",
       isFreelance: true,
       tasks: [
-        "Refonte et migration des microservices data sur Python et Mage AI",
-        "Dashboards temps réel Grafana",
-        "Intervention auprès des clients et de leurs problématiques métiers"
+        [{text: "Refonte et migration des microservices data sur "}, {text: "Python", bold: true}, {text: " et "}, {text: "Mage AI", bold: true}],
+        [{text: "Dashboards temps réel "}, {text: "Grafana", bold: true}],
+        [{text: "Intervention auprès des clients et de leurs problématiques métiers"}]
       ]
     },
     {
@@ -44,13 +43,13 @@ const CV_CONTENT = {
       company: "Mc Ma Solutions",
       isFreelance: false,
       tasks: [
-        "Création du pôle data : conception et développement de microservices data (API REST)",
-        "Stack technique : ETL Talend, orchestration Scala, backend Java, BDD MySQL, Clickhouse, ElasticSearch",
-        "Différentes temporalités à gérer (microbatch, temps réel, événementiel)",
-        "Dashboards temps réel Grafana",
-        "Suivi clients, élaboration de roadmaps, gestion de projet",
-        "Supervision de stagiaires",
-        "Data : Factures énergétiques, consommations temps réel, météo, prix de l'énergie, infrastructures clientes"
+        [{text: "Création du pôle data : conception et développement de microservices data ("}, {text: "API REST", bold: true}, {text: ")"}],
+        [{text: "Stack technique : ETL "}, {text: "Talend", bold: true}, {text: ", orchestration "}, {text: "Scala", bold: true}, {text: ", backend "}, {text: "Java", bold: true}, {text: ", BDD "}, {text: "MySQL", bold: true}, {text: ", "}, {text: "Clickhouse", bold: true}, {text: ", "}, {text: "ElasticSearch", bold: true}],
+        [{text: "Différentes temporalités à gérer (microbatch, temps réel, événementiel)"}],
+        [{text: "Dashboards temps réel "}, {text: "Grafana", bold: true}],
+        [{text: "Suivi clients, élaboration de roadmaps, gestion de projet"}],
+        [{text: "Supervision de stagiaires"}],
+        [{text: "Data :", bold: true}, {text: " Factures énergétiques, consommations temps réel, météo, prix de l'énergie, infrastructures clientes"}]
       ]
     }
   ],
@@ -106,7 +105,7 @@ const CV_CONTENT = {
   ]
 };
 
-const CV_THEME = {
+const CV_THEME_FR = {
   colors: {
     background: [255, 255, 255],
     accent: [74, 107, 68],
@@ -125,7 +124,7 @@ const CV_THEME = {
   },
 
   dimensions: {
-    photoSize: 140,
+    photoSize: 160,
     photoRadius: 15,
     containerPadding: 60,
     sectionSpacing: 30,
@@ -134,10 +133,10 @@ const CV_THEME = {
 
   typography: {
     nameSize: 42,
-    titleSize: 28,
-    contactSize: 18,
+    titleSize: 32,
+    contactSize: 20,
     descriptionSize: 18,
-    sectionTitleSize: 22,
+    sectionTitleSize: 24,
     experienceTitleSize: 18,
     experienceMetaSize: 16,
     experienceTaskSize: 16

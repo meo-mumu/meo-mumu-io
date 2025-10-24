@@ -39,15 +39,22 @@ class CvPageP5 {
     this.ui = {
       contentHeight: 0,
       scrollbarBounds: {},
-      exportButtonBounds: {}
+      exportButtonBounds: {},
+      languageButtonBounds: {
+        fr: {},
+        en: {}
+      },
+      downloadButtonBounds: {}
     };
+
+    this.currentLanguage = 'fr'; // 'fr' or 'en'
 
     this.assets = {
       profileImage: null
     };
 
-    this.theme = CV_THEME;
-    this.content = CV_CONTENT;
+    this.theme = CV_THEME_FR;
+    this.content = CV_CONTENT_FR;
 
     // Export mode flag
     this.isPdfExport = false;
@@ -78,10 +85,6 @@ class CvPageP5 {
 
     // Lancer le shockwave effect
     shockwave.appearEffect("extended-bubbling");
-    await sleep(6000);
-    herald.addMessage("> Click here to export a PDF version", 100, () => {
-      this.exporter.exportToPDF();
-    });
   }
 
   async hide() {
@@ -173,6 +176,26 @@ class CvPageP5 {
       content: { x: containerX + padding, width: contentWidth, startY: containerY + padding },
       padding
     };
+  }
+
+  switchLanguage(lang) {
+    this.currentLanguage = lang;
+
+    // Load appropriate content and theme
+    if (lang === 'fr') {
+      this.content = CV_CONTENT_FR;
+      this.theme = CV_THEME_FR;
+    } else {
+      this.content = CV_CONTENT_EN;
+      this.theme = CV_THEME_EN;
+    }
+
+    // Reload profile image with new path
+    this.loadAssets();
+
+    // Reset scroll
+    this.scrollState.current = 0;
+    this.scrollState.target = 0;
   }
 
   // === DELEGATION TO MODULES ===

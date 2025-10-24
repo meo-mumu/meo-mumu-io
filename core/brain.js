@@ -45,7 +45,7 @@ function setup() {
   backgroundGraphic.background(244, 243, 241);
 
   // Position Herald en bas à gauche
-  herald = new Herald(50, height - 45);
+  herald = new Herald(30, height - 30);
 
   // Initialiser objects pages
   pages.set('mainPage', new MainPage());

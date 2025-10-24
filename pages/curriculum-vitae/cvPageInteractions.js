@@ -7,6 +7,16 @@ class CvPageInteractions {
   }
 
   onMousePressed() {
+    // Check language buttons click
+    if (this.checkLanguageButtonClick()) {
+      return;
+    }
+
+    // Check download button click
+    if (this.checkDownloadButtonClick()) {
+      return;
+    }
+
     // Check export button click
     if (this.cvPage.ui.exportButtonBounds) {
       const bounds = this.cvPage.ui.exportButtonBounds;
@@ -93,5 +103,39 @@ class CvPageInteractions {
     const relativeY = mouseY - bounds.trackY;
     const trackProgress = constrain(relativeY / bounds.trackHeight, 0, 1);
     this.cvPage.scrollState.target = trackProgress * this.cvPage.scrollState.max;
+  }
+
+  checkLanguageButtonClick() {
+    // Check Fr button
+    const frBounds = this.cvPage.ui.languageButtonBounds.fr;
+    if (mouseX >= frBounds.x && mouseX <= frBounds.x + frBounds.width &&
+        mouseY >= frBounds.y && mouseY <= frBounds.y + frBounds.height) {
+      if (this.cvPage.currentLanguage !== 'fr') {
+        this.cvPage.switchLanguage('fr');
+      }
+      return true;
+    }
+
+    // Check En button
+    const enBounds = this.cvPage.ui.languageButtonBounds.en;
+    if (mouseX >= enBounds.x && mouseX <= enBounds.x + enBounds.width &&
+        mouseY >= enBounds.y && mouseY <= enBounds.y + enBounds.height) {
+      if (this.cvPage.currentLanguage !== 'en') {
+        this.cvPage.switchLanguage('en');
+      }
+      return true;
+    }
+
+    return false;
+  }
+
+  checkDownloadButtonClick() {
+    const bounds = this.cvPage.ui.downloadButtonBounds;
+    if (mouseX >= bounds.x && mouseX <= bounds.x + bounds.width &&
+        mouseY >= bounds.y && mouseY <= bounds.y + bounds.height) {
+      this.cvPage.exporter.exportToPDF();
+      return true;
+    }
+    return false;
   }
 }

@@ -86,6 +86,8 @@ class CvPageRenderers {
 
   renderUI(layout) {
     this.renderScrollIndicator(layout.container);
+    this.renderLanguageButtons(layout.container);
+    this.renderDownloadButton(layout.container);
   }
 
   // === CONTAINER AND BASIC DRAWING ===
@@ -504,5 +506,109 @@ class CvPageRenderers {
     this.cvPage.applyFont();
     graphic.textSize(12);
     this.renderTextWithGlitch("Export PDF", buttonX + buttonWidth/2, buttonY + buttonHeight/2, 12);
+  }
+
+  renderLanguageButtons({ x, y, width, height }) {
+    const buttonSize = 32; // Boutons carrés
+    const buttonSpacing = 6; // Espacement entre les boutons
+    const buttonX = x - buttonSize - 15; // À l'extérieur, à gauche du container
+    const buttonYFr = y; // Aligné avec le haut du container
+    const buttonYEn = buttonYFr + buttonSize + buttonSpacing; // En dessous pour En
+
+    // Render Fr button
+    this.renderLanguageButton('Fr', buttonX, buttonYFr, buttonSize, this.cvPage.currentLanguage === 'fr');
+
+    // Store bounds for Fr
+    this.cvPage.ui.languageButtonBounds.fr = {
+      x: buttonX, y: buttonYFr,
+      width: buttonSize, height: buttonSize
+    };
+
+    // Render En button
+    this.renderLanguageButton('En', buttonX, buttonYEn, buttonSize, this.cvPage.currentLanguage === 'en');
+
+    // Store bounds for En
+    this.cvPage.ui.languageButtonBounds.en = {
+      x: buttonX, y: buttonYEn,
+      width: buttonSize, height: buttonSize
+    };
+  }
+
+  renderLanguageButton(label, x, y, size, isActive) {
+    // Button background - même couleur que le CV
+    this.cvPage.applyColor(this.cvPage.COLORS.BACKGROUND);
+    graphic.noStroke();
+
+    if (isActive) {
+      // Active button avec ombre légère
+      this.cvPage.animator.applyLightShadow(() => {
+        graphic.rect(x, y, size, size, 6);
+      });
+    } else {
+      // Inactive button sans ombre
+      graphic.rect(x, y, size, size, 6);
+    }
+
+    // Button text
+    graphic.textAlign(graphic.CENTER, graphic.CENTER);
+    this.cvPage.applyFont();
+    graphic.textSize(14);
+
+    if (isActive) {
+      // Active: couleur accent (vert)
+      this.cvPage.applyColor(this.cvPage.theme.colors.accent);
+      graphic.drawingContext.font = `bold 14px "Segoe UI"`;
+    } else {
+      // Inactive: couleur grise
+      this.cvPage.applyColor(this.cvPage.theme.colors.textSecondary);
+    }
+
+    this.renderTextWithGlitch(label, x + size/2, y + size/2, 14);
+  }
+
+  renderDownloadButton({ x, y, width, height }) {
+    const buttonSize = 32; // Même taille que les boutons de langue
+    const buttonX = x - buttonSize - 15; // Même x que les boutons de langue
+    const buttonY = y + height - buttonSize; // Aligné avec le bas du container
+
+    // Store bounds for interaction
+    this.cvPage.ui.downloadButtonBounds = {
+      x: buttonX, y: buttonY,
+      width: buttonSize, height: buttonSize
+    };
+
+    // Button background avec ombre légère
+    this.cvPage.animator.applyLightShadow(() => {
+      this.cvPage.applyColor(this.cvPage.COLORS.BACKGROUND);
+      graphic.noStroke();
+      graphic.rect(buttonX, buttonY, buttonSize, buttonSize, 6);
+    });
+
+    // Download icon (flèche dessinée comme Chrome)
+    const centerX = buttonX + buttonSize/2;
+    const centerY = buttonY + buttonSize/2;
+    const iconSize = 14; // Taille de l'icône
+
+    this.cvPage.applyColor(this.cvPage.theme.colors.accent);
+    graphic.noStroke();
+
+    // Tige verticale de la flèche
+    const stemWidth = 2.5;
+    const stemHeight = iconSize * 0.6;
+    graphic.rect(centerX - stemWidth/2, centerY - iconSize/2, stemWidth, stemHeight);
+
+    // Triangle pointant vers le bas
+    graphic.beginShape();
+    graphic.vertex(centerX, centerY + iconSize/2 - 2); // Pointe
+    graphic.vertex(centerX - iconSize/3, centerY - 2); // Gauche
+    graphic.vertex(centerX + iconSize/3, centerY - 2); // Droite
+    graphic.endShape(graphic.CLOSE);
+
+    // Ligne horizontale en bas (la "surface")
+    graphic.strokeWeight(2.5);
+    graphic.stroke(...this.cvPage.theme.colors.accent);
+    graphic.line(centerX - iconSize/2.5, centerY + iconSize/2 + 2,
+                 centerX + iconSize/2.5, centerY + iconSize/2 + 2);
+    graphic.noStroke();
   }
 }

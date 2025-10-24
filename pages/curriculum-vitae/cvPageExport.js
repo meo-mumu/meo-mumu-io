@@ -19,9 +19,9 @@ class CvPageExport {
     // Activer le mode PDF export pour augmenter les tailles
     this.cvPage.isPdfExport = true;
 
-    // Créer un graphics haute résolution pour le PDF (A4 à 300 DPI)
-    const pdfWidth = 2480;  // A4 width à 300 DPI (8.27" * 300)
-    const pdfHeight = 3508; // A4 height à 300 DPI (11.69" * 300)
+    // Créer un graphics haute résolution pour le PDF (A4 à 150 DPI)
+    const pdfWidth = 1240;  // A4 width à 150 DPI (8.27" * 150)
+    const pdfHeight = 1754; // A4 height à 150 DPI (11.69" * 150)
     const pdfGraphics = createGraphics(pdfWidth, pdfHeight);
 
     // Configurer le graphics PDF directement sans toucher au global
@@ -97,14 +97,14 @@ class CvPageExport {
 
     // Convertir en image et créer le PDF
     const canvas = pdfGraphics.canvas;
-    const imgData = canvas.toDataURL('image/png');
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
     // Créer le PDF avec jsPDF
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'mm', 'a4');
 
     // Ajouter l'image au PDF (210mm x 297mm = A4)
-    pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+    pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
 
     // Télécharger le PDF
     pdf.save('CV_Leo_Macias.pdf');
