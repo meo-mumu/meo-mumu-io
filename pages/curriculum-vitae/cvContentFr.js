@@ -45,7 +45,7 @@ const CV_CONTENT_FR = {
       isFreelance: false,
       tasks: [
         [{text: "Création du pôle data : conception et développement de microservices data ("}, {text: "API REST", bold: true}, {text: ")"}],
-        [{text: "Stack technique : ETL "}, {text: "Talend", bold: true}, {text: ", orchestration "}, {text: "Scala", bold: true}, {text: ", backend "}, {text: "Java", bold: true}, {text: ", BDD "}, {text: "MySQL", bold: true}, {text: ", "}, {text: "Clickhouse", bold: true}, {text: ", "}, {text: "ElasticSearch", bold: true}],
+        [{text: "Stack technique : ETL "}, {text: "Talend", bold: true}, {text: ", orchestration "}, {text: "Scala", bold: true}, {text: ", backend "}, {text: "Java", bold: true}, {text: ", BDD "}, {text: "MySQL", bold: true}, {text: ", "}, {text: "MariaDB", bold: true}, {text: ", "}, {text: "Clickhouse", bold: true}, {text: ", "}, {text: "ElasticSearch", bold: true}],
         [{text: "Différentes temporalités à gérer (microbatch, temps réel, événementiel)"}],
         [{text: "Dashboards temps réel "}, {text: "Grafana", bold: true}],
         [{text: "Suivi clients, élaboration de roadmaps, gestion de projet"}],
@@ -63,7 +63,7 @@ const CV_CONTENT_FR = {
     },
     {
       category: "Database",
-      items: ["Snowflake", "MySQL", "Clickhouse", "Elasticsearch"]
+      items: ["Snowflake", "MySQL", "MariaDB", "Clickhouse", "Elasticsearch"]
     },
     {
       category: "Orchestration & ETL",

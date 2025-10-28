@@ -46,7 +46,7 @@ const CV_CONTENT_EN = {
       isFreelance: false,
       tasks: [
         [{text: "Created the data team: design and development of data microservices ("}, {text: "REST API", bold: true}, {text: ")"}],
-        [{text: "Tech stack: ETL "}, {text: "Talend", bold: true}, {text: ", orchestration "}, {text: "Scala", bold: true}, {text: ", backend "}, {text: "Java", bold: true}, {text: ", DB "}, {text: "MySQL", bold: true}, {text: ", "}, {text: "Clickhouse", bold: true}, {text: ", "}, {text: "ElasticSearch", bold: true}],
+        [{text: "Tech stack: ETL "}, {text: "Talend", bold: true}, {text: ", orchestration "}, {text: "Scala", bold: true}, {text: ", backend "}, {text: "Java", bold: true}, {text: ", DB "}, {text: "MySQL", bold: true}, {text: ", "}, {text: "MariaDB", bold: true}, {text: ", "}, {text: "Clickhouse", bold: true}, {text: ", "}, {text: "ElasticSearch", bold: true}],
         [{text: "Multiple time granularities (microbatch, real-time, event-driven)"}],
         [{text: "Real-time dashboards "}, {text: "Grafana", bold: true}],
         [{text: "Client follow-up, roadmap development, project management"}],
@@ -64,7 +64,7 @@ const CV_CONTENT_EN = {
     },
     {
       category: "Database",
-      items: ["Snowflake", "MySQL", "Clickhouse", "Elasticsearch"]
+      items: ["Snowflake", "MySQL", "MariaDB", "Clickhouse", "Elasticsearch"]
     },
     {
       category: "Orchestration & ETL",
