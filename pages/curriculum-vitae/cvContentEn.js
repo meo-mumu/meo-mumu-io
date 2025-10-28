@@ -20,8 +20,9 @@ const CV_CONTENT_EN = {
       isFreelance: true,
       tasks: [
         [{text: "Maintenance and creation of "}, {text: "SQL", bold: true}, {text: " pipelines on "}, {text: "Snowflake", bold: true}],
-        [{text: "Orchestration with "}, {text: "Talend", bold: true}, {text: " and "}, {text: "Airflow", bold: true}],
-        [{text: "Dashboards "}, {text: "Tableau", bold: true}, {text: " and automated reporting"}],
+        [{text: "Orchestration with "}, {text: "Talend", bold: true}, {text: " and "}, {text: "Airflow", bold: true}, {text: " (hosted on "}, {text: "AWS", bold: true}, {text: ")"}],
+        [{text: "Dashboards "}, {text: "Tableau", bold: true}, {text: " and automated "}, {text: "Excel", bold: true}, {text: " reporting"}],
+        [{text: "CI/CD with "}, {text: "GitHub", bold: true}],
         [{text: "Data:", bold: true}, {text: " casino and online poker player behavior"}]
       ]
     },
@@ -32,7 +33,7 @@ const CV_CONTENT_EN = {
       company: "Mc Ma Solutions",
       isFreelance: true,
       tasks: [
-        [{text: "Redesign and migration of data microservices on "}, {text: "Python", bold: true}, {text: " and "}, {text: "Mage AI", bold: true}],
+        [{text: "Redesign and migration of pipelines and data microservices on "}, {text: "Python", bold: true}, {text: " and "}, {text: "Mage AI", bold: true}],
         [{text: "Real-time dashboards "}, {text: "Grafana", bold: true}],
         [{text: "Client support and business challenges"}]
       ]
@@ -50,6 +51,7 @@ const CV_CONTENT_EN = {
         [{text: "Real-time dashboards "}, {text: "Grafana", bold: true}],
         [{text: "Client follow-up, roadmap development, project management"}],
         [{text: "Supervision of interns"}],
+        [{text: "CI/CD with "}, {text: "GitLab", bold: true}],
         [{text: "Data:", bold: true}, {text: " Energy bills, real-time consumption, weather, energy prices, client infrastructures"}]
       ]
     }
@@ -61,8 +63,12 @@ const CV_CONTENT_EN = {
       items: ["Python", "Kotlin", "JavaScript", "GLSL"]
     },
     {
-      category: "Data & Pipeline",
-      items: ["SQL", "NoSQL", "Snowflake", "Talend", "Airflow", "Mage AI"]
+      category: "Database",
+      items: ["Snowflake", "MySQL", "Clickhouse", "Elasticsearch"]
+    },
+    {
+      category: "Orchestration & ETL",
+      items: ["Airflow", "Talend", "Mage AI"]
     },
     {
       category: "BI Visualization",
@@ -97,7 +103,7 @@ const CV_CONTENT_EN = {
     },
     {
       category: "Music",
-      items: ["Piano", "Sound design", "Modular", "DJ"]
+      items: ["Sound design", "Modular", "Piano", "DJ"]
     },
     {
       category: "Generative Art",

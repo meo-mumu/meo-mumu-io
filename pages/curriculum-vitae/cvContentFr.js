@@ -19,8 +19,9 @@ const CV_CONTENT_FR = {
       isFreelance: true,
       tasks: [
         [{text: "Maintien et création de pipelines "}, {text: "SQL", bold: true}, {text: " sous "}, {text: "Snowflake", bold: true}],
-        [{text: "Orchestration via "}, {text: "Talend", bold: true}, {text: " et "}, {text: "Airflow", bold: true}],
-        [{text: "Dashboard "}, {text: "Tableau", bold: true}, {text: " et envoi de rapports automatisés"}],
+        [{text: "Orchestration via "}, {text: "Talend", bold: true}, {text: " et "}, {text: "Airflow", bold: true}, {text: " (hébergé sur "}, {text: "AWS", bold: true}, {text: ")"}],
+        [{text: "Dashboard "}, {text: "Tableau", bold: true}, {text: " et envoi de rapports "}, {text: "Excel", bold: true}, {text: " automatisés"}],
+        [{text: "CI/CD via "}, {text: "GitHub", bold: true}],
         [{text: "Data :", bold: true}, {text: " comportement des joueurs de casino et poker en ligne"}]
       ]
     },
@@ -31,7 +32,7 @@ const CV_CONTENT_FR = {
       company: "Mc Ma Solutions",
       isFreelance: true,
       tasks: [
-        [{text: "Refonte et migration des microservices data sur "}, {text: "Python", bold: true}, {text: " et "}, {text: "Mage AI", bold: true}],
+        [{text: "Refonte et migration des pipelines et microservices data sur "}, {text: "Python", bold: true}, {text: " et "}, {text: "Mage AI", bold: true}],
         [{text: "Dashboards temps réel "}, {text: "Grafana", bold: true}],
         [{text: "Intervention auprès des clients et de leurs problématiques métiers"}]
       ]
@@ -49,6 +50,7 @@ const CV_CONTENT_FR = {
         [{text: "Dashboards temps réel "}, {text: "Grafana", bold: true}],
         [{text: "Suivi clients, élaboration de roadmaps, gestion de projet"}],
         [{text: "Supervision de stagiaires"}],
+        [{text: "CI/CD via "}, {text: "GitLab", bold: true}],
         [{text: "Data :", bold: true}, {text: " Factures énergétiques, consommations temps réel, météo, prix de l'énergie, infrastructures clientes"}]
       ]
     }
@@ -60,8 +62,12 @@ const CV_CONTENT_FR = {
       items: ["Python", "Kotlin", "JavaScript", "GLSL"]
     },
     {
-      category: "Data & Pipeline",
-      items: ["SQL", "NoSQL", "Snowflake", "Talend", "Airflow", "Mage AI"]
+      category: "Database",
+      items: ["Snowflake", "MySQL", "Clickhouse", "Elasticsearch"]
+    },
+    {
+      category: "Orchestration & ETL",
+      items: ["Airflow", "Talend", "Mage AI"]
     },
     {
       category: "Visualisation BI",
@@ -96,7 +102,7 @@ const CV_CONTENT_FR = {
     },
     {
       category: "Musique",
-      items: ["Piano", "Sound design", "Modulaire", "DJ"]
+      items: ["Sound design", "Modulaire", "Piano", "DJ"]
     },
     {
       category: "Art génératif",

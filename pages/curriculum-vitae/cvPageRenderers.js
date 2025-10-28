@@ -134,25 +134,23 @@ class CvPageRenderers {
   }
 
   drawTagBase(text, tagX, tagY, tagWidth, tagHeight, withShadow = false) {
-    // Tag background
-    const drawTag = () => {
-      this.cvPage.applyColor(this.cvPage.theme.colors.accentBackground);
-      graphic.stroke(...this.cvPage.theme.colors.accentLight);
-      graphic.strokeWeight(1);
-      graphic.rect(tagX, tagY, tagWidth, tagHeight, 8);
-      if (!withShadow) graphic.noStroke();
-    };
+    // Tag background - style néomorphique avec ombre grise légère
+    graphic.drawingContext.save();
+    graphic.drawingContext.shadowColor = 'rgba(120, 120, 120, 0.2)';
+    graphic.drawingContext.shadowBlur = 1;
+    graphic.drawingContext.shadowOffsetX = 1;
+    graphic.drawingContext.shadowOffsetY = 1;
 
-    if (withShadow) {
-      this.cvPage.animator.applyShadow(drawTag);
-    } else {
-      drawTag();
-    }
+    this.cvPage.applyColor(this.cvPage.COLORS.BACKGROUND);
+    graphic.noStroke();
+    graphic.rect(tagX, tagY, tagWidth, tagHeight, 6);
+
+    graphic.drawingContext.restore();
 
     // Tag text - perfectly centered en gras avec taille scalée
     const scaledSize = this.cvPage.getScaledSize(14);
     graphic.textAlign(graphic.LEFT, graphic.CENTER);
-    this.cvPage.applyColor(this.cvPage.theme.colors.textMedium);
+    this.cvPage.applyColor(this.cvPage.theme.colors.accent); // Texte en couleur accent comme les boutons actifs
     graphic.textSize(scaledSize);
     this.cvPage.applyFont();
     graphic.drawingContext.font = `bold ${scaledSize}px "Segoe UI"`; // Texte en gras avec taille scalée
@@ -291,7 +289,7 @@ class CvPageRenderers {
     }
 
     // Calculate uniform offset
-    const baseMargin = 30;
+    const baseMargin = 50;
     const pdfExtraMargin = this.cvPage.isPdfExport ? 20 : 0;
     return maxCategoryWidth + baseMargin + pdfExtraMargin;
   }
@@ -626,11 +624,12 @@ class CvPageRenderers {
     const centerY = buttonY + buttonSize/2;
     const iconSize = 14; // Taille de l'icône
 
-    this.cvPage.applyColor(this.cvPage.theme.colors.accent);
+    // Couleur accent avec opacité réduite (50%)
+    this.cvPage.applyColor([...this.cvPage.theme.colors.accent, 128]);
     graphic.noStroke();
 
     // Tige verticale de la flèche
-    const stemWidth = 2.5;
+    const stemWidth = 1.5;
     const stemHeight = iconSize * 0.6;
     graphic.rect(centerX - stemWidth/2, centerY - iconSize/2, stemWidth, stemHeight);
 
@@ -642,8 +641,8 @@ class CvPageRenderers {
     graphic.endShape(graphic.CLOSE);
 
     // Ligne horizontale en bas (la "surface")
-    graphic.strokeWeight(2.5);
-    graphic.stroke(...this.cvPage.theme.colors.accent);
+    graphic.strokeWeight(1.5);
+    graphic.stroke(...this.cvPage.theme.colors.accent, 128);
     graphic.line(centerX - iconSize/2.5, centerY + iconSize/2 + 2,
                  centerX + iconSize/2.5, centerY + iconSize/2 + 2);
     graphic.noStroke();
