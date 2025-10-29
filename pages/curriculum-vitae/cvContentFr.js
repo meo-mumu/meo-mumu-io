@@ -19,6 +19,7 @@ const CV_CONTENT_FR = {
       isFreelance: true,
       tasks: [
         [{text: "Maintien et création de pipelines "}, {text: "SQL", bold: true}, {text: " sous "}, {text: "Snowflake", bold: true}],
+        [{text: "Data modeling", bold: true}],
         [{text: "Orchestration via "}, {text: "Talend", bold: true}, {text: " et "}, {text: "Airflow", bold: true}, {text: " (hébergé sur "}, {text: "AWS", bold: true}, {text: ")"}],
         [{text: "Dashboard "}, {text: "Tableau", bold: true}, {text: " et envoi de rapports "}, {text: "Excel", bold: true}, {text: " automatisés"}],
         [{text: "CI/CD via "}, {text: "GitHub", bold: true}],
@@ -63,7 +64,7 @@ const CV_CONTENT_FR = {
     },
     {
       category: "Database",
-      items: ["Snowflake", "MySQL", "MariaDB", "Clickhouse", "Elasticsearch"]
+      items: ["Snowflake", "MySQL", "MariaDB", "Clickhouse", "Elasticsearch", "Data modeling"]
     },
     {
       category: "Orchestration & ETL",
