@@ -212,8 +212,14 @@ class CvPageRenderers {
     this.cvPage.setTextStyle(theme.typography.descriptionSize, theme.colors.textPrimary);
     const lines = this.cvPage.wrapText(this.cvPage.content.description, width, theme.typography.descriptionSize);
     let currentDescY = descriptionY;
-    for (const line of lines) {
-      this.renderTextWithGlitch(line, x, currentDescY, theme.typography.descriptionSize);
+    for (let i = 0; i < lines.length; i++) {
+      const isLastLine = i === lines.length - 1;
+      if (!isLastLine) {
+        this.renderJustifiedText(lines[i], x, currentDescY, width, theme.typography.descriptionSize);
+      } else {
+        // Dernière ligne : alignement à gauche
+        this.renderTextWithGlitch(lines[i], x, currentDescY, theme.typography.descriptionSize);
+      }
       currentDescY += this.cvPage.getScaledSpacing(theme.dimensions.lineSpacing);
     }
 
@@ -270,6 +276,31 @@ class CvPageRenderers {
   }
 
   // === COMPONENT RENDERERS ===
+
+  renderJustifiedText(text, x, y, width, fontSize) {
+    const words = text.split(' ');
+    if (words.length === 1) {
+      this.renderTextWithGlitch(text, x, y, fontSize);
+      return;
+    }
+
+    // Calculer la largeur totale des mots
+    let totalWordsWidth = 0;
+    for (const word of words) {
+      totalWordsWidth += graphic.textWidth(word);
+    }
+
+    // Calculer l'espace à distribuer entre les mots
+    const totalSpaceWidth = width - totalWordsWidth;
+    const spacePerGap = totalSpaceWidth / (words.length - 1);
+
+    // Rendre chaque mot avec l'espacement calculé
+    let currentX = x;
+    for (let i = 0; i < words.length; i++) {
+      this.renderTextWithGlitch(words[i], currentX, y, fontSize);
+      currentX += graphic.textWidth(words[i]) + spacePerGap;
+    }
+  }
 
   calculateUniformTagOffset() {
     // Find the longest category across both skills and interests
